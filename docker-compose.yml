@@ -1,0 +1,38 @@
+version: '2'
+
+services:
+  app:
+    image: 'omaximuz/firstimage:latest'
+    build:
+      context: .
+    container_name: app
+    depends_on:
+       db:
+         condition: service_healthy
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/sabot
+      - SPRING_DATASOURCE_USERNAME=sabot-postgres
+      - SPRING_DATASOURCE_PASSWORD=sabot-postgres
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+
+  db:
+    image: 'postgres:15.2-alpine'
+    container_name: db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./sabot-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    environment:
+      - POSTGRES_USER=sabot-postgres
+      - POSTGRES_PASSWORD=sabot-postgres
+      - POSTGRES_DB=sabot
+      - PGDATA=/var/lib/postgresql/data/pgdata
+
+volumes:
+ sabot-postgres-data:
