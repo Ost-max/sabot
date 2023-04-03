@@ -3,10 +3,8 @@ package dev.ostmax.sabot.client;
 import dev.ostmax.sabot.model.User;
 import dev.ostmax.sabot.service.RegistrationService;
 import dev.ostmax.sabot.service.UserService;
-import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
@@ -48,7 +46,6 @@ public class TelegramBotClient extends TelegramLongPollingBot {
     private final UserService userService;
     @Value("${default.unit.id}")
     private UUID defaultUnitId;
-
 
     public TelegramBotClient(TelegramClientProperties config, RegistrationService registrationService, UserService userService) {
         super(config.getToken());
