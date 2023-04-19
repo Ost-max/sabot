@@ -13,13 +13,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Singular;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Collection;
-import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @Data
@@ -31,19 +29,16 @@ public class Event {
 
     @Id
     @GeneratedValue
-    private UUID id;
+    private Long id;
     private String name;
     @ManyToMany
+    @Singular
     private Collection<User> users;
     @Column
     private LocalTime time;
     @Column
     private LocalDate date;
-    @JoinColumn(name = "event_template_id", insertable = false, updatable = false)
     @ManyToOne(targetEntity = EventTemplate.class, fetch = FetchType.EAGER)
     private EventTemplate template;
-    @Column(name = "event_template_id")
-    private UUID templateId;
-
 
 }

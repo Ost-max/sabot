@@ -11,8 +11,8 @@ public class NewUserState implements BotState {
 
     private static final String STATE_NAME = "NEW_USER";
 
-    private static final String FIRST_GREETINGS = "Здраствуйте, {0}! Я бот-админ служений. " +
-            "C помощью меня можно записаться на служение, посмотреть расписание на следующий месяц, " +
+    private static final String FIRST_GREETINGS = "Здраствуйте, {0}! Я бот-админ мероприятий. " +
+            "C помощью меня можно записаться на мероприятие, посмотреть расписание на следующий месяц, " +
             "кроме того я буду напоминать вам о предстающих событиях в которых вы участвуете." +
             "Для начала давайте познакомимся. Для продолжения введите ваще ФИО. Например Иванов Иван Иванович:";
     private final UserService userService;

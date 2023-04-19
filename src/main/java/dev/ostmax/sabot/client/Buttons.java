@@ -1,6 +1,6 @@
 package dev.ostmax.sabot.client;
 
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ForceReplyKeyboard;
+import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
@@ -8,23 +8,35 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static dev.ostmax.sabot.client.BotCommands.HELP;
-import static dev.ostmax.sabot.client.BotCommands.USER_LIST;
 
+@Component
 public class Buttons {
 
-    private static final InlineKeyboardButton HELP_BUTTON = new InlineKeyboardButton("Помощь");
-    private static final InlineKeyboardButton REGISTER_BUTTON = new InlineKeyboardButton("Регистрация");
-    private static final InlineKeyboardButton USER_LIST_BUTTON = new InlineKeyboardButton("Список участников");
-    private static final InlineKeyboardButton REGISTER_FOR_EVENT = new InlineKeyboardButton("Зарегистрироваться на служение");
+    private final TelegramClientProperties config;
 
-    public static InlineKeyboardMarkup inlineMarkup() {
+
+    private static final InlineKeyboardButton HELP_BUTTON = new InlineKeyboardButton("Помощь");
+    private static final InlineKeyboardButton MY_EVENTS_BUTTON = new InlineKeyboardButton("Мероприятия где я участвую");
+    private static final InlineKeyboardButton REGISTER_FOR_EVENT = new InlineKeyboardButton("Зарегистрироваться на служение");
+    private static final InlineKeyboardButton MONTH_EVENTS_BUTTON = new InlineKeyboardButton("Расписание на месяц");
+
+    //Admin
+    private static final InlineKeyboardButton USER_LIST_BUTTON = new InlineKeyboardButton("Список участников");
+    // Common
+    private static final InlineKeyboardButton MAIN_MENU_BUTTON = new InlineKeyboardButton("Главное меню");
+
+    public Buttons(TelegramClientProperties config) {
+        this.config = config;
+    }
+
+    public InlineKeyboardMarkup inlineMarkup() {
         HELP_BUTTON.setCallbackData(HELP);
-        USER_LIST_BUTTON.setCallbackData(USER_LIST);
+        MONTH_EVENTS_BUTTON.setUrl(config.getReportingUrl() + "/report/events/month");
         REGISTER_FOR_EVENT.setCallbackData(BotCommands.REGISTER_FOR_EVENT);
 
         List<List<InlineKeyboardButton>> rowsInLine = List.of(
                 List.of(HELP_BUTTON),
-                List.of(USER_LIST_BUTTON),
+                List.of(MONTH_EVENTS_BUTTON),
                 List.of(REGISTER_FOR_EVENT)
         );
 

@@ -7,9 +7,10 @@ import dev.ostmax.sabot.model.User;
 import dev.ostmax.sabot.repository.EventRepository;
 import dev.ostmax.sabot.repository.EventTemplateRepository;
 import dev.ostmax.sabot.service.time.AllSpecificDaysInAMonthQuery;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -20,7 +21,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
@@ -60,19 +63,24 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Event registerToEvent(UUID templateId, User user, LocalDateTime localDateTime) {
-        return this.eventRepository.save(Event.builder()
-                 .templateId(templateId)
-                 .users(List.of(user))
-                 .time(localDateTime.toLocalTime())
-                 .date(localDateTime.toLocalDate())
-                 .build());
+    public Event registerToEvent(long templateId, User user, LocalDateTime localDateTime) {
+       Optional<EventTemplate> template =  eventTemplateRepository.findById(templateId);
+       if(template.isPresent()) {
+           Event event = Event.builder()
+                   .name(template.get().getName())
+                   .template(template.get())
+                   .users(List.of(user))
+                   .time(localDateTime.toLocalTime())
+                   .date(localDateTime.toLocalDate())
+                   .build();
+           return this.eventRepository.save(event);
+       }
+       return null;
     }
 
 
     @Override
-    @Transactional
-    public Event registerToEvent(UUID eventId, User user) {
+    public Event registerToEvent(long eventId, User user) {
         Optional<Event> event = eventRepository.findById(eventId);
         if(event.isPresent()) {
             event.get().getUsers().add(user);
@@ -93,7 +101,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Map<EventTemplate, Event> getEventsForConcreteDate(UUID unitId, LocalDate date) {
+    public Map<LocalTime, Set<Event>> getEventsForConcreteDate(UUID unitId, LocalDate date) {
         Collection<EventTemplate> templates = eventTemplateRepository.findAllByUnitIdAndOccursDayOfWeek(unitId, date.getDayOfWeek());
         Map<EventTemplate, Event> existEventMap = eventRepository.findEventsByDateAndTemplateIdIn(date, templates.stream().map(EventTemplate::getId).collect(toSet()))
                 .stream()
@@ -107,7 +115,15 @@ public class EventServiceImpl implements EventService {
                         .time(tmpl.getOccursTime()).build())
                 .collect(toMap(Event::getTemplate, event -> event));
         existEventMap.putAll(timeEventMap);
-        return existEventMap;
+        return existEventMap.entrySet()
+                .stream()
+                .collect(Collectors.groupingBy(
+                        entry -> entry.getKey().getOccursTime(),
+                        Collectors.mapping(
+                                Map.Entry::getValue,
+                                Collectors.toSet()
+                        )
+                ));
     }
 
 

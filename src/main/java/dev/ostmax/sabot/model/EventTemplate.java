@@ -25,7 +25,7 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 public class EventTemplate {
     @Id
     @GeneratedValue
-    private UUID id;
+    private long id;
     @NonNull
     private String name;
     private int demand;

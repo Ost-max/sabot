@@ -85,16 +85,15 @@ public class TelegramBotClient extends TelegramLongPollingBot {
     }
 
     public void sendMessage(long chatId, String text) {
-        sendMessage(chatId, text, null);
+        sendMessage(chatId, text, null, false);
     }
 
-    public void sendMessage(long chatId, String text, ReplyKeyboard replyKeyboard) {
+    public void sendMessage(long chatId, String text, ReplyKeyboard replyKeyboard, boolean markdown) {
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
         message.setText(text);
-        if (replyKeyboard != null) {
-            message.setReplyMarkup(replyKeyboard);
-        }
+        message.setReplyMarkup(replyKeyboard);
+        message.enableMarkdownV2(markdown);
         try {
             execute(message);
             log.info("Reply sent");
@@ -102,5 +101,4 @@ public class TelegramBotClient extends TelegramLongPollingBot {
             log.error(e.getMessage());
         }
     }
-
 }

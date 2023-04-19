@@ -7,7 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 @Data
 @NoArgsConstructor
@@ -29,7 +28,7 @@ public class BotContext {
     }
 
     public void sendMessage(String text, ReplyKeyboard keyboard) {
-        client.sendMessage(chatId, text, keyboard);
+        client.sendMessage(chatId, text, keyboard, false);
     }
 
 }

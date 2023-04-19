@@ -5,10 +5,13 @@ import dev.ostmax.sabot.model.Event;
 import dev.ostmax.sabot.service.EventService;
 import dev.ostmax.sabot.service.UserService;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
+@Component
+@Slf4j
 public class EventRegistrationSaveState implements BotState {
 
     public static final String STATE_ID = "EVENT_REGISTRATION_SAVE";
@@ -25,7 +28,6 @@ public class EventRegistrationSaveState implements BotState {
         this.commonUserState = commonUserState;
     }
 
-
     @Override
     @Transactional
     public BotState handleCommand(BotContext botContext) {
@@ -35,14 +37,19 @@ public class EventRegistrationSaveState implements BotState {
             var templateId = params[2];
             var eventId = params[3];
             Event event;
-            if(!"no".equals(eventId)) {
-                event = eventService.registerToEvent(UUID.fromString(eventId), botContext.getUser());
+            log.info("time {} template {} eventId {}", time, templateId, eventId);
+            if("-".equals(eventId)) {
+                log.info("save as new event");
+                event = eventService.registerToEvent(Long.parseLong(templateId), botContext.getUser(), LocalDateTime.parse(time));
             } else {
-                event = eventService.registerToEvent(UUID.fromString(templateId), botContext.getUser(), LocalDateTime.parse(time));
+                log.info("update event");
+                event = eventService.registerToEvent(Long.parseLong(eventId), botContext.getUser());
             }
             botContext.getUser().setStateId(null);
             userService.save(botContext.getUser());
-            botContext.sendMessage("Спасибо, Вы успешно зарегистрировалсись: " + event.getTemplate().getName() + " " + event.getDate() + " " + event.getTime());
+            log.info("event id {}" , event.getId());
+            botContext.sendMessage("Спасибо, Вы успешно зарегистрировалсись: " + event.getName() + " " + event.getDate() + " " + event.getTime());
+            botContext.setMessage(BotCommands.START);
             return commonUserState;
 
         }

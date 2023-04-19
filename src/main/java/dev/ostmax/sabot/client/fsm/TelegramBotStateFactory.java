@@ -3,9 +3,9 @@ package dev.ostmax.sabot.client.fsm;
 import dev.ostmax.sabot.model.User;
 import dev.ostmax.sabot.service.UserService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
 import java.util.Optional;
 
 
@@ -14,28 +14,29 @@ import java.util.Optional;
 public class TelegramBotStateFactory {
 
 
-    private final Map<String, BotState> states;
+    private final ApplicationContext applicationContext;
     private final UserService userService;
 
-    public TelegramBotStateFactory(Map<String, BotState> states, UserService userService) {
-        this.states = states;
+    public TelegramBotStateFactory(ApplicationContext applicationContext, UserService userService) {
+        this.applicationContext = applicationContext;
         this.userService = userService;
     }
 
 
     public BotState getState(BotContext context) {
         log.info("get messages {} hasCallbackQuery {}", context.getMessage(), context.isHasCallbackQuery());
+
         Optional<User> userTest = userService.findByTelegramId(context.getUserId());
         if (userTest.isEmpty()) {
-            return states.get("newUserState");
+            return applicationContext.getBean(NewUserState.class);
         } else {
             User user = userTest.get();
             context.setUser(user);
             if (user.isAdmin()) {
-                return states.get("adminState");
+                return applicationContext.getBean(AdminState.class);
             }
             if("/start".equals(context.getMessage())) {
-                return states.get("commonUserState");
+                return applicationContext.getBean(CommonUserState.class);
             }
             BotState savedUserState = getSavedUserState(user.getStateId());
             log.info("stateID {}", user.getStateId());
@@ -45,10 +46,9 @@ public class TelegramBotStateFactory {
                 return savedUserState;
             }
             if (context.getMessage().startsWith("/")) {
-                return states.get("commonUserState");
+                return applicationContext.getBean(CommonUserState.class);
             }
-            return states.get("unknownCommandState");
-
+            return applicationContext.getBean(UnknownCommandState.class);
         }
     }
 
@@ -58,10 +58,10 @@ public class TelegramBotStateFactory {
             return null;
         }
         switch (stateId) {
-            case UserRegistrationState.STATE_ID -> state = states.get("userRegistrationState");
-            case CommonUserState.STATE_ID -> state = states.get("commonUserState");
-            case EventRegistrationChooseTimeState.STATE_ID -> state = states.get("eventRegistrationChooseTimeState");
-            case EventRegistrationSaveState.STATE_ID -> state = states.get("eventRegistrationSaveState");
+            case UserRegistrationState.STATE_ID -> state = applicationContext.getBean(UserRegistrationState.class);
+            case CommonUserState.STATE_ID -> state = applicationContext.getBean(CommonUserState.class);
+            case EventRegistrationChooseTimeState.STATE_ID -> state = applicationContext.getBean(EventRegistrationChooseTimeState.class);
+            case EventRegistrationSaveState.STATE_ID -> state = applicationContext.getBean(EventRegistrationSaveState.class);
         }
         return state;
     }

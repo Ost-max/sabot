@@ -7,7 +7,7 @@ import java.time.DayOfWeek;
 import java.util.Collection;
 import java.util.UUID;
 
-public interface EventTemplateRepository  extends CrudRepository<EventTemplate, UUID> {
+public interface EventTemplateRepository extends CrudRepository<EventTemplate, Long> {
 
     Collection<EventTemplate> findAllByUnitId(UUID unitId);
 
