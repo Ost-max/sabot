@@ -13,4 +13,6 @@ public interface UserRepository extends CrudRepository<User, UUID> {
     Collection<User> findByUnitId(UUID unitId);
 
     Optional<User> findByTelegramId(long telegramId);
+
+    Collection<User> findAllByActiveIsTrue();
 }

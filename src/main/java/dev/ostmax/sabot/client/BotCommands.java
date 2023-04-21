@@ -20,8 +20,12 @@ public interface BotCommands {
     Map<String, BotCommand> LIST_OF_COMMANDS = Map.of(
             START, new BotCommand(START, "start bot"),
             HELP, new BotCommand(HELP,  "bot info"),
+/*
             MY_EVENTS, new BotCommand(MY_EVENTS,  "events where user participates"),
+*/
+/*
             MONTHLY_SCHEDULE, new BotCommand(MY_EVENTS,  "All events for next month"),
+*/
             REGISTER_FOR_EVENT, new BotCommand(REGISTER_FOR_EVENT, "Register for event")
     );
 

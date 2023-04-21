@@ -26,10 +26,9 @@ public class TelegramBotClient extends TelegramLongPollingBot {
     private final TelegramClientProperties config;
     private final TelegramBotStateFactory telegramBotStateFactory;
 
-    public TelegramBotClient(TelegramClientProperties config, TelegramBotStateFactory telegramBotStateFactory1) {
+    public TelegramBotClient(TelegramClientProperties config, TelegramBotStateFactory telegramBotStateFactory) {
         super(config.getToken());
-        log.info(config.getToken());
-        this.telegramBotStateFactory = telegramBotStateFactory1;
+        this.telegramBotStateFactory = telegramBotStateFactory;
         try {
             this.execute(new SetMyCommands(LIST_OF_COMMANDS.values().stream().toList(),
                     new BotCommandScopeDefault(),
@@ -85,15 +84,14 @@ public class TelegramBotClient extends TelegramLongPollingBot {
     }
 
     public void sendMessage(long chatId, String text) {
-        sendMessage(chatId, text, null, false);
+        sendMessage(chatId, text, null);
     }
 
-    public void sendMessage(long chatId, String text, ReplyKeyboard replyKeyboard, boolean markdown) {
+    public void sendMessage(long chatId, String text, ReplyKeyboard replyKeyboard) {
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
         message.setText(text);
         message.setReplyMarkup(replyKeyboard);
-        message.enableMarkdownV2(markdown);
         try {
             execute(message);
             log.info("Reply sent");

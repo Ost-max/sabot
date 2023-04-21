@@ -35,10 +35,10 @@ public interface EventService {
 
     Collection<LocalDate> getAllRegularEventDatesForNextPeriod(UUID unitId, LocalDate date, Regularity regularity);
 
-    Map<LocalTime, Set<Event>> getEventsForConcreteDate(UUID unitId, LocalDate date);
+    Map<LocalTime, Set<Event>> getEventsMapForConcreteDate(UUID unitId, LocalDate date);
 
-    Collection<Event> getDemandedEvents(UUID unitId, LocalDate date);
+    Set<Event> getEventsForConcreteDate(UUID unitId, LocalDate date);
 
-    Collection<Event> getEventsForPeriod(UUID unitId, LocalDate date);
+
     // Event with lack of participants, date is optional
 }

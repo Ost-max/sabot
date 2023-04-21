@@ -2,7 +2,6 @@ package dev.ostmax.sabot.service;
 
 import dev.ostmax.sabot.model.Regularity;
 import dev.ostmax.sabot.model.ReportRecord;
-import dev.ostmax.sabot.model.User;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -32,7 +31,7 @@ public class ReportServiceImpl implements ReportService{
                 Regularity.ONCE_A_WEEK);
         var result = new HashMap<String, List<ReportRecord>> ();
         for(LocalDate date: currentMonthEvents) {
-            List<ReportRecord> eventList = eventService.getEventsForConcreteDate(DEFAULT_UNIT_ID, date).values().stream().flatMap(events ->
+            List<ReportRecord> eventList = eventService.getEventsMapForConcreteDate(DEFAULT_UNIT_ID, date).values().stream().flatMap(events ->
                     events.stream().flatMap(event ->
                             Stream.concat(Stream.of(new ReportRecord(event.getName() + " " + event.getTime(), true)),
                                     event.getUsers().stream().map(user -> new ReportRecord(user.getName()))))).toList();

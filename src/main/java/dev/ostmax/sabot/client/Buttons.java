@@ -14,10 +14,13 @@ public class Buttons {
 
     private final TelegramClientProperties config;
 
+    public static final InlineKeyboardButton REGISTER_FOR_EVENT = InlineKeyboardButton.builder()
+            .text("Зарегистрироваться на служение")
+            .callbackData(BotCommands.REGISTER_FOR_EVENT)
+            .build();
 
     private static final InlineKeyboardButton HELP_BUTTON = new InlineKeyboardButton("Помощь");
     private static final InlineKeyboardButton MY_EVENTS_BUTTON = new InlineKeyboardButton("Мероприятия где я участвую");
-    private static final InlineKeyboardButton REGISTER_FOR_EVENT = new InlineKeyboardButton("Зарегистрироваться на служение");
     private static final InlineKeyboardButton MONTH_EVENTS_BUTTON = new InlineKeyboardButton("Расписание на месяц");
 
     //Admin
@@ -29,23 +32,27 @@ public class Buttons {
         this.config = config;
     }
 
-    public InlineKeyboardMarkup inlineMarkup() {
+    public InlineKeyboardMarkup mainMenu() {
         HELP_BUTTON.setCallbackData(HELP);
         MONTH_EVENTS_BUTTON.setUrl(config.getReportingUrl() + "/report/events/month");
-        REGISTER_FOR_EVENT.setCallbackData(BotCommands.REGISTER_FOR_EVENT);
-
         List<List<InlineKeyboardButton>> rowsInLine = List.of(
                 List.of(HELP_BUTTON),
                 List.of(MONTH_EVENTS_BUTTON),
                 List.of(REGISTER_FOR_EVENT)
         );
-
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         markupInline.setKeyboard(rowsInLine);
         return markupInline;
     }
 
-    public static InlineKeyboardMarkup of(List<String> strings) {
+    public static InlineKeyboardMarkup of(List<InlineKeyboardButton> buttons) {
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        markupInline.setKeyboard(List.of(buttons));
+        return markupInline;
+    }
+
+
+    public static InlineKeyboardMarkup fromTitles(List<String> strings) {
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         markupInline.setKeyboard(strings.stream().map(text -> {
                   InlineKeyboardButton button = new InlineKeyboardButton(text);

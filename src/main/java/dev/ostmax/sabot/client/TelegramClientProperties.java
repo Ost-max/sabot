@@ -11,5 +11,4 @@ public class TelegramClientProperties {
     @Value("${bot.name}") String botName;
     @Value("${bot.token}") String token;
     @Value("${report.url}") String reportingUrl;
-
 }

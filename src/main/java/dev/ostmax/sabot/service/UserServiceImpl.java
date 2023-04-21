@@ -4,6 +4,7 @@ import dev.ostmax.sabot.model.User;
 import dev.ostmax.sabot.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.Optional;
 
 @Service
@@ -23,6 +24,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<User> findByTelegramId(long telegramId) {
         return userRepository.findByTelegramId(telegramId);
+    }
+
+    @Override
+    public Collection<User> getAllActiveUsers() {
+        return userRepository.findAllByActiveIsTrue();
     }
 
     @Override

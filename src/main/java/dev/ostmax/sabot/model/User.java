@@ -42,4 +42,6 @@ public class User {
     private Unit unit;
     private String stateId;
     private boolean isAdmin;
+    @Column(name = "active", nullable = false, columnDefinition = "bool default true")
+    private boolean active;
 }

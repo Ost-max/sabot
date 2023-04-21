@@ -37,7 +37,7 @@ public class EventRegistrationChooseDatesState implements BotState {
                     stream().
                     map(LocalDate::toString).
                     collect(Collectors.toList());
-            botContext.sendMessage("Выберете дату:", Buttons.of(availableDates));
+            botContext.sendMessage("Выберете дату:", Buttons.fromTitles(availableDates));
             user.setStateId(eventRegistrationChooseTime.getStateId());
             userService.save(user);
         }

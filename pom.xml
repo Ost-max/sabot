@@ -54,17 +54,8 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>de.vandermeer</groupId>
-			<artifactId>asciitable</artifactId>
-			<version>0.3.2</version>
-		</dependency>
-		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-freemarker</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

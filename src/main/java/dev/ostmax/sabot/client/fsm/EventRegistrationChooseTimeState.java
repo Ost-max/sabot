@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static dev.ostmax.sabot.repository.UnitRepository.DEFAULT_UNIT_ID;
@@ -36,7 +35,7 @@ public class EventRegistrationChooseTimeState implements BotState {
     @Transactional
     public BotState handleCommand(BotContext botContext) {
         try {
-            var timeToEvents = eventService.getEventsForConcreteDate(DEFAULT_UNIT_ID, LocalDate.parse(botContext.getMessage()));
+            var timeToEvents = eventService.getEventsMapForConcreteDate(DEFAULT_UNIT_ID, LocalDate.parse(botContext.getMessage()));
             botContext.sendMessage("Выберете время и место:");
             for(var entry: timeToEvents.entrySet()) {
                 botContext.sendMessage(entry.getKey().toString(),

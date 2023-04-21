@@ -18,6 +18,7 @@ import lombok.Singular;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Collection;
+import java.util.Set;
 import java.util.UUID;
 
 @Data
@@ -33,7 +34,7 @@ public class Event {
     private String name;
     @ManyToMany
     @Singular
-    private Collection<User> users;
+    private Set<User> users;
     @Column
     private LocalTime time;
     @Column

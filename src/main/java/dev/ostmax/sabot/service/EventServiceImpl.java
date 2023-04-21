@@ -10,13 +10,10 @@ import dev.ostmax.sabot.service.time.AllSpecificDaysInAMonthQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.temporal.TemporalAdjusters;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -101,7 +98,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Map<LocalTime, Set<Event>> getEventsForConcreteDate(UUID unitId, LocalDate date) {
+    public Map<LocalTime, Set<Event>> getEventsMapForConcreteDate(UUID unitId, LocalDate date) {
         Collection<EventTemplate> templates = eventTemplateRepository.findAllByUnitIdAndOccursDayOfWeek(unitId, date.getDayOfWeek());
         Map<EventTemplate, Event> existEventMap = eventRepository.findEventsByDateAndTemplateIdIn(date, templates.stream().map(EventTemplate::getId).collect(toSet()))
                 .stream()
@@ -126,32 +123,10 @@ public class EventServiceImpl implements EventService {
                 ));
     }
 
-
-    public Collection<Event> getDemandedEvents(UUID unitId, LocalDate date) {
-        return null;
-    }
-
     @Override
-    public Collection<Event> getEventsForPeriod(UUID unitId, LocalDate start) {
-        LocalDate end = start.with(TemporalAdjusters.lastDayOfMonth());
-        return eventRepository.findEventsByRange(unitId, start, end);
+    public Set<Event> getEventsForConcreteDate(UUID unitId, LocalDate date) {
+        Set<EventTemplate> templates = eventTemplateRepository.findAllByUnitIdAndOccursDayOfWeek(unitId, date.getDayOfWeek());
+        return eventRepository.findEventsByDateAndTemplateIdIn(date, templates.stream().map(EventTemplate::getId).collect(toSet()));
     }
-
-    public Collection<Event> createEventsForNextMount(UUID unitId) {
-      /*  Collection<Event> unitEvents = eventTemplateRepository.fi(unitId);
-     LocalDate today = LocalDate.now ( zoneId );
-        LocalDate firstOfCurrentMonth = today.withDayOfMonth( 1 ) ;
-        ZonedDateTime zdt = firstOfCurrentMonth.atStartOfDay ( zoneId );
-        int mnth = LocalDateTime.now().getMonth().getValue();
-        unitEvents.stream().filter(template ->
-           eventRepository.countForCurrentPeriod(template.getId(), mnth) < 1
-        ).map(event -> {
-
-
-        });*/
-        return null;
-    }
-
-
 
 }

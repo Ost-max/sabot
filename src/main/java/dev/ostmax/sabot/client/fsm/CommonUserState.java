@@ -25,7 +25,7 @@ public class CommonUserState implements BotState {
     public BotState handleCommand(BotContext context) {
         BotState nextState = null;
         switch (context.getMessage()) {
-            case START -> context.sendMessage("Выберете действие", buttons.inlineMarkup());
+            case START -> context.sendMessage("Выберете действие", buttons.mainMenu());
             case HELP -> context.sendMessage("Раздел в разработке...");
             case REGISTER_FOR_EVENT -> nextState = eventRegistration;
             default -> nextState = unknownCommandState;

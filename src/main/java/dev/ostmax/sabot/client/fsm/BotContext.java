@@ -28,7 +28,7 @@ public class BotContext {
     }
 
     public void sendMessage(String text, ReplyKeyboard keyboard) {
-        client.sendMessage(chatId, text, keyboard, false);
+        client.sendMessage(chatId, text, keyboard);
     }
 
 }

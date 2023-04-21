@@ -36,6 +36,8 @@ public class TelegramBotStateFactory {
                 return applicationContext.getBean(AdminState.class);
             }
             if("/start".equals(context.getMessage())) {
+                user.setStateId(null);
+                userService.save(user);
                 return applicationContext.getBean(CommonUserState.class);
             }
             BotState savedUserState = getSavedUserState(user.getStateId());
