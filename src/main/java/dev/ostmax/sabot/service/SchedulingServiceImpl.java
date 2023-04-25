@@ -2,7 +2,7 @@ package dev.ostmax.sabot.service;
 
 import dev.ostmax.sabot.client.Buttons;
 import dev.ostmax.sabot.client.TelegramBotClient;
-import dev.ostmax.sabot.model.Event;
+import dev.ostmax.sabot.model.EventItem;
 import dev.ostmax.sabot.repository.UnitRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -44,17 +43,14 @@ public class SchedulingServiceImpl implements SchedulingService {
     public void notifyUsersBeforeEvent() {
         var queryDate = LocalDate.now().plus(1, ChronoUnit.DAYS);
         log.info("queryDate: " + queryDate.toString());
-        Set<Event> events = eventService.getEventsForConcreteDate(UnitRepository.DEFAULT_UNIT_ID, queryDate);
+        Set<EventItem> events = eventService.getEventsForConcreteDate(UnitRepository.DEFAULT_UNIT_ID, queryDate);
         log.info("events: " + events.size());
         events.forEach(event -> {
-                    log.info("events {} users {}", event.getName() + " " + event.getTime() + " ", event.getUsers().size());
-                    event.getUsers().forEach(user -> {
-                                var messageToUser = MessageFormat.format(NOTIFY_EVENT_MESSAGE, user.getName(), event.getName(),
-                                        LocalDateTime.of(event.getDate(), event.getTime()).format(dateFormat));
-                                log.info("messageToUser {}", messageToUser);
-                                this.telegramBotClient.sendMessage(user.getTelegramId(), messageToUser);
-                            }
-                    );
+                    log.info("events {} users {}", event.getName() + " " + event.getTime() + " ", event.getUser());
+                    var messageToUser = MessageFormat.format(NOTIFY_EVENT_MESSAGE, event.getUser().getName(), event.getName(),
+                            event.getTime().format(dateFormat));
+                    log.info("messageToUser {}", messageToUser);
+                    this.telegramBotClient.sendMessage(event.getUser().getTelegramId(), messageToUser);
                 }
         );
     }

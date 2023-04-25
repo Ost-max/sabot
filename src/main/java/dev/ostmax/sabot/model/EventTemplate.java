@@ -4,18 +4,16 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
-import java.sql.Time;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
-import java.util.UUID;
-
-import static jakarta.persistence.GenerationType.IDENTITY;
+import java.util.Set;
 
 @Data
 @Entity
@@ -37,5 +35,7 @@ public class EventTemplate {
     private Regularity regularity;
     @ManyToOne
     private Unit unit;
+    @OneToMany(mappedBy = "template")
+    private Set<EventItem> events;
 
 }

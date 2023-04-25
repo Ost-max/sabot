@@ -1,19 +1,21 @@
 package dev.ostmax.sabot.model;
 
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Collection;
+import java.time.LocalDate;
+import java.util.Set;
 import java.util.UUID;
 
 @Data
@@ -21,7 +23,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name="bot_user")
+@Table(name="bot_user", indexes = @Index(columnList = "telegramId", unique = true))
 public class User {
 
     public User(long telegramId, String nick) {
@@ -32,12 +34,14 @@ public class User {
     @Id
     @GeneratedValue
     private UUID id;
+    @Nonnull
     private String name;
+    private LocalDate dateOfBirth;
+    private String phone;
     private String nick;
-    // create index
     private long telegramId;
-    @ManyToMany
-    private Collection<Event> events;
+    @OneToMany(mappedBy = "user")
+    private Set<EventItem> events;
     @ManyToOne
     private Unit unit;
     private String stateId;

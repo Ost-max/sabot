@@ -3,7 +3,8 @@ package dev.ostmax.sabot.client.fsm;
 import dev.ostmax.sabot.client.BotCommands;
 import dev.ostmax.sabot.client.Buttons;
 import dev.ostmax.sabot.client.SimpleCommand;
-import dev.ostmax.sabot.model.Event;
+import dev.ostmax.sabot.model.EventItem;
+import dev.ostmax.sabot.model.GroupEvent;
 import dev.ostmax.sabot.service.EventService;
 import dev.ostmax.sabot.service.UserService;
 import jakarta.transaction.Transactional;
@@ -11,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.stream.Collectors;
 
@@ -35,11 +35,13 @@ public class EventRegistrationChooseTimeState implements BotState {
     @Transactional
     public BotState handleCommand(BotContext botContext) {
         try {
-            var timeToEvents = eventService.getEventsMapForConcreteDate(DEFAULT_UNIT_ID, LocalDate.parse(botContext.getMessage()));
+            var timeToEvents = eventService.getEventsWithParticipantsForConcreteDate(DEFAULT_UNIT_ID, LocalDate.parse(botContext.getMessage()));
             botContext.sendMessage("Выберете время и место:");
             for(var entry: timeToEvents.entrySet()) {
                 botContext.sendMessage(entry.getKey().toString(),
-                        Buttons.fromCommands(entry.getValue().stream().map(this::mapToCommand).collect(Collectors.toList())));
+                        Buttons.fromCommands(entry.getValue().stream()
+                                .map(this::mapToCommand).collect(Collectors.toList()))
+                );
             }
             botContext.getUser().setStateId(EventRegistrationSaveState.STATE_ID);
             userService.save(botContext.getUser());
@@ -50,14 +52,12 @@ public class EventRegistrationChooseTimeState implements BotState {
         return null;
     }
 
-    private SimpleCommand mapToCommand(Event event) {
+    private SimpleCommand mapToCommand(GroupEvent event) {
         var command = BotCommands.SAVE_EVENT +
                 " " +
-                LocalDateTime.of(event.getDate(), event.getTime()) +
+                event.getTime() +
                 " " +
-                event.getTemplate().getId() +
-                " " +
-                (event.getId() != null ? event.getId() : "-");
+                event.getTemplateId();
         log.info(command);
         return new SimpleCommand(event.getName(), command);
     }

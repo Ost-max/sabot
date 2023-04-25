@@ -1,7 +1,8 @@
 package dev.ostmax.sabot.service;
 
-import dev.ostmax.sabot.model.Event;
+import dev.ostmax.sabot.model.EventItem;
 import dev.ostmax.sabot.model.EventTemplate;
+import dev.ostmax.sabot.model.GroupEvent;
 import dev.ostmax.sabot.model.Regularity;
 import dev.ostmax.sabot.model.User;
 import dev.ostmax.sabot.repository.EventRepository;
@@ -15,7 +16,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -60,15 +60,14 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Event registerToEvent(long templateId, User user, LocalDateTime localDateTime) {
-       Optional<EventTemplate> template =  eventTemplateRepository.findById(templateId);
+    public EventItem registerToEvent(long templateId, User user, LocalDateTime localDateTime) {
+       Optional<EventTemplate> template = eventTemplateRepository.findById(templateId);
        if(template.isPresent()) {
-           Event event = Event.builder()
+           EventItem event = EventItem.builder()
                    .name(template.get().getName())
                    .template(template.get())
-                   .users(List.of(user))
-                   .time(localDateTime.toLocalTime())
-                   .date(localDateTime.toLocalDate())
+                   .user(user)
+                   .time(localDateTime)
                    .build();
            return this.eventRepository.save(event);
        }
@@ -77,13 +76,14 @@ public class EventServiceImpl implements EventService {
 
 
     @Override
-    public Event registerToEvent(long eventId, User user) {
-        Optional<Event> event = eventRepository.findById(eventId);
-        if(event.isPresent()) {
-            event.get().getUsers().add(user);
+    public EventItem registerToEvent(long eventId, User user) {
+        Optional<EventItem> event = eventRepository.findById(eventId);
+        throw new UnsupportedOperationException();
+/*        if(event.isPresent()) {
+            event.get().getUser().add(user);
             return this.eventRepository.save(event.get());
         }
-        return null;
+        return null;*/
     }
 
     @Override
@@ -98,35 +98,50 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Map<LocalTime, Set<Event>> getEventsMapForConcreteDate(UUID unitId, LocalDate date) {
+    public Map<LocalTime, Set<GroupEvent>> getEventsWithParticipantsForConcreteDate(UUID unitId, LocalDate date) {
         Collection<EventTemplate> templates = eventTemplateRepository.findAllByUnitIdAndOccursDayOfWeek(unitId, date.getDayOfWeek());
-        Map<EventTemplate, Event> existEventMap = eventRepository.findEventsByDateAndTemplateIdIn(date, templates.stream().map(EventTemplate::getId).collect(toSet()))
-                .stream()
-                .collect(toMap(Event::getTemplate, event -> event));
-        Map<EventTemplate, Event> timeEventMap = templates.stream()
-                .filter(tmpl -> !existEventMap.containsKey(tmpl))
-                .map( tmpl -> Event.builder()
-                        .template(tmpl)
-                        .name(tmpl.getName())
-                        .date(date)
-                        .time(tmpl.getOccursTime()).build())
-                .collect(toMap(Event::getTemplate, event -> event));
-        existEventMap.putAll(timeEventMap);
-        return existEventMap.entrySet()
+
+        var existEventMap = eventRepository.findEventsByTimeBetweenAndTemplateIdIn(date.atStartOfDay(), date.atTime(23, 59), templates.stream().map(EventTemplate::getId).collect(toSet()))
                 .stream()
                 .collect(Collectors.groupingBy(
-                        entry -> entry.getKey().getOccursTime(),
+                        EventItem::getTemplate,
                         Collectors.mapping(
-                                Map.Entry::getValue,
+                                event -> event,
+                                Collectors.toSet()
+                        )
+                ));
+
+        var gropEvents = templates.stream().map(template -> {
+                    var eventBuilder = GroupEvent.builder();
+                    eventBuilder.templateId(template.getId());
+                    eventBuilder.name(template.getName());
+                    if (existEventMap.containsKey(template)) {
+                        var events = existEventMap.get(template);
+                        eventBuilder.time(events.iterator().next().getTime());
+                        eventBuilder.participants(events.stream().map(EventItem::getUser).collect(toSet()));
+                    } else {
+                        eventBuilder.time(LocalDateTime.of(date, template.getOccursTime()));
+                    }
+                    return eventBuilder.build();
+                }
+        ).collect(toSet());
+
+
+        return gropEvents
+                .stream()
+                .collect(Collectors.groupingBy(
+                        event -> event.getTime().toLocalTime(),
+                        Collectors.mapping(
+                                event -> event,
                                 Collectors.toSet()
                         )
                 ));
     }
 
-    @Override
-    public Set<Event> getEventsForConcreteDate(UUID unitId, LocalDate date) {
+        @Override
+    public Set<EventItem> getEventsForConcreteDate(UUID unitId, LocalDate date) {
         Set<EventTemplate> templates = eventTemplateRepository.findAllByUnitIdAndOccursDayOfWeek(unitId, date.getDayOfWeek());
-        return eventRepository.findEventsByDateAndTemplateIdIn(date, templates.stream().map(EventTemplate::getId).collect(toSet()));
+        return eventRepository.findEventsByTimeBetweenAndTemplateIdIn(date.atStartOfDay(), date.atTime(23, 59), templates.stream().map(EventTemplate::getId).collect(toSet()));
     }
 
 }

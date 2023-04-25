@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static dev.ostmax.sabot.repository.UnitRepository.DEFAULT_UNIT_ID;
@@ -26,15 +27,15 @@ public class ReportServiceImpl implements ReportService{
 
     @Override
     public Map<String, List<ReportRecord>> getReportForCurrentMonth() {
-        Collection<LocalDate> currentMonthEvents  = eventService.getAllRegularEventDatesForNextPeriod(DEFAULT_UNIT_ID,
+        Collection<LocalDate> currentMonthEvents = eventService.getAllRegularEventDatesForNextPeriod(DEFAULT_UNIT_ID,
                 LocalDate.now().withDayOfMonth(1),
                 Regularity.ONCE_A_WEEK);
         var result = new HashMap<String, List<ReportRecord>> ();
         for(LocalDate date: currentMonthEvents) {
-            List<ReportRecord> eventList = eventService.getEventsMapForConcreteDate(DEFAULT_UNIT_ID, date).values().stream().flatMap(events ->
+            List<ReportRecord> eventList = eventService.getEventsWithParticipantsForConcreteDate(DEFAULT_UNIT_ID, date).values().stream().flatMap(events ->
                     events.stream().flatMap(event ->
-                            Stream.concat(Stream.of(new ReportRecord(event.getName() + " " + event.getTime(), true)),
-                                    event.getUsers().stream().map(user -> new ReportRecord(user.getName()))))).toList();
+                            Stream.concat(Stream.of(new ReportRecord(event.getName() + " " + event.getTime().toLocalTime(), true)),
+                                    event.getParticipants().stream().map(user -> new ReportRecord(user.getName()))))).toList();
             result.put(date.format(DateTimeFormatter.ofPattern("dd MMMM").withLocale(Locale.of("RU"))), eventList);
         }
         return result;

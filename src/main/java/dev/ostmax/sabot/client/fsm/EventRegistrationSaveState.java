@@ -1,7 +1,6 @@
 package dev.ostmax.sabot.client.fsm;
 
 import dev.ostmax.sabot.client.BotCommands;
-import dev.ostmax.sabot.model.Event;
 import dev.ostmax.sabot.service.EventService;
 import dev.ostmax.sabot.service.UserService;
 import jakarta.transaction.Transactional;
@@ -35,20 +34,11 @@ public class EventRegistrationSaveState implements BotState {
             var params = botContext.getCallbackQuery().split(" ");
             var time = params[1];
             var templateId = params[2];
-            var eventId = params[3];
-            Event event;
-            log.info("time {} template {} eventId {}", time, templateId, eventId);
-            if("-".equals(eventId)) {
-                log.info("save as new event");
-                event = eventService.registerToEvent(Long.parseLong(templateId), botContext.getUser(), LocalDateTime.parse(time));
-            } else {
-                log.info("update event");
-                event = eventService.registerToEvent(Long.parseLong(eventId), botContext.getUser());
-            }
+            log.info("time {} template {}", time, templateId);
+            var event = eventService.registerToEvent(Long.parseLong(templateId), botContext.getUser(), LocalDateTime.parse(time));
             botContext.getUser().setStateId(null);
             userService.save(botContext.getUser());
-            log.info("event id {}" , event.getId());
-            botContext.sendMessage("Спасибо, Вы успешно зарегистрировалсись: " + event.getName() + " " + event.getDate() + " " + event.getTime());
+            botContext.sendMessage("Спасибо, Вы успешно зарегистрировалсись: " + event.getName() + " " + event.getTime().toLocalDate() + " " + event.getTime().toLocalTime());
             botContext.setMessage(BotCommands.START);
             return commonUserState;
 

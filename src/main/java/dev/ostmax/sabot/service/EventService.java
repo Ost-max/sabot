@@ -1,7 +1,8 @@
 package dev.ostmax.sabot.service;
 
-import dev.ostmax.sabot.model.Event;
+import dev.ostmax.sabot.model.EventItem;
 import dev.ostmax.sabot.model.EventTemplate;
+import dev.ostmax.sabot.model.GroupEvent;
 import dev.ostmax.sabot.model.Regularity;
 import dev.ostmax.sabot.model.User;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,16 +29,16 @@ public interface EventService {
     Collection<EventTemplate> getUnitEvents(UUID unitId);
 
     @Transactional
-    Event registerToEvent(long templateId, User user, LocalDateTime localDateTime);
+    EventItem registerToEvent(long templateId, User user, LocalDateTime localDateTime);
 
     @Transactional
-    Event registerToEvent(long eventId, User user);
+    EventItem registerToEvent(long eventId, User user);
 
     Collection<LocalDate> getAllRegularEventDatesForNextPeriod(UUID unitId, LocalDate date, Regularity regularity);
 
-    Map<LocalTime, Set<Event>> getEventsMapForConcreteDate(UUID unitId, LocalDate date);
+    Map<LocalTime, Set<GroupEvent>> getEventsWithParticipantsForConcreteDate(UUID unitId, LocalDate date);
 
-    Set<Event> getEventsForConcreteDate(UUID unitId, LocalDate date);
+    Set<EventItem> getEventsForConcreteDate(UUID unitId, LocalDate date);
 
 
     // Event with lack of participants, date is optional

@@ -22,6 +22,21 @@ public class Unit {
     @OneToMany
     private List<EventTemplate> eventTemplates;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Unit unit = (Unit) o;
+
+        return id.equals(unit.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
+
     public Unit(String name) {
         this.name = name;
     }
