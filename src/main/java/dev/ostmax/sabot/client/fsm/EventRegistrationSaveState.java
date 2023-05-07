@@ -41,7 +41,6 @@ public class EventRegistrationSaveState implements BotState {
             botContext.sendMessage("Спасибо, Вы успешно зарегистрировалсись: " + event.getName() + " " + event.getTime().toLocalDate() + " " + event.getTime().toLocalTime());
             botContext.setMessage(BotCommands.START);
             return commonUserState;
-
         }
         return unknownCommandState;
     }

@@ -16,6 +16,7 @@ import java.time.format.DateTimeParseException;
 import java.util.stream.Collectors;
 
 import static dev.ostmax.sabot.repository.UnitRepository.DEFAULT_UNIT_ID;
+import static dev.ostmax.sabot.service.time.DateTimeUtils.simple_date_time;
 
 @Component
 @Slf4j
@@ -38,7 +39,7 @@ public class EventRegistrationChooseTimeState implements BotState {
             var timeToEvents = eventService.getEventsWithParticipantsForConcreteDate(DEFAULT_UNIT_ID, LocalDate.parse(botContext.getMessage()));
             botContext.sendMessage("Выберете время и место:");
             for(var entry: timeToEvents.entrySet()) {
-                botContext.sendMessage(entry.getKey().toString(),
+                botContext.sendMessage(entry.getKey().format(simple_date_time),
                         Buttons.fromCommands(entry.getValue().stream()
                                 .map(this::mapToCommand).collect(Collectors.toList()))
                 );
@@ -46,8 +47,7 @@ public class EventRegistrationChooseTimeState implements BotState {
             botContext.getUser().setStateId(EventRegistrationSaveState.STATE_ID);
             userService.save(botContext.getUser());
         } catch (DateTimeParseException ex) {
-            botContext.getUser().setStateId(null);
-            botContext.sendMessage("Не могу распознать дату. Попробуйте ещё раз или нажмите кнопку вернуться.");
+            botContext.sendMessage("Не могу распознать дату. Попробуйте ещё раз или нажмите вернуться в главное меню.", Buttons.start());
         }
         return null;
     }

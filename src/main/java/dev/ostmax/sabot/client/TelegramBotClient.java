@@ -17,6 +17,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
+
 import static dev.ostmax.sabot.client.BotCommands.LIST_OF_COMMANDS;
 
 @Slf4j
@@ -67,11 +68,14 @@ public class TelegramBotClient extends TelegramLongPollingBot {
     private BotContext createBotContext(Update update) {
         BotContext.BotContextBuilder botContextBuilder = BotContext.builder();
         if (update.hasMessage() && update.getMessage().hasText()) {
+            log.info(update.getMessage().getFrom().toString());
+            botContextBuilder.messageId(update.getMessage().getMessageId());
             botContextBuilder.message(update.getMessage().getText());
             botContextBuilder.chatId(update.getMessage().getChatId());
             botContextBuilder.userId(update.getMessage().getFrom().getId());
             botContextBuilder.nick(update.getMessage().getFrom().getUserName());
         } else if (update.hasCallbackQuery()) {
+            botContextBuilder.messageId(update.getCallbackQuery().getMessage().getMessageId());
             botContextBuilder.hasCallbackQuery(true);
             botContextBuilder.message(update.getCallbackQuery().getData());
             botContextBuilder.callbackQuery(update.getCallbackQuery().getData());
@@ -86,13 +90,19 @@ public class TelegramBotClient extends TelegramLongPollingBot {
     public void sendMessage(long chatId, String text) {
         sendMessage(chatId, text, null);
     }
-
     public void sendMessage(long chatId, String text, ReplyKeyboard replyKeyboard) {
+        sendMessage(chatId, text, replyKeyboard, null);
+    }
+    public void sendMessage(long chatId, String text, ReplyKeyboard replyKeyboard, Integer messageId) {
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
         message.setText(text);
+        message.setReplyToMessageId(messageId);
         message.setReplyMarkup(replyKeyboard);
         try {
+            this.execute(new SetMyCommands(LIST_OF_COMMANDS.values().stream().toList(),
+                    new BotCommandScopeDefault(),
+                    "ru"));
             execute(message);
             log.info("Reply sent");
         } catch (TelegramApiException e) {

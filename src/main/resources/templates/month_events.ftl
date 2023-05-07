@@ -9,16 +9,16 @@
 <h2>График на текущий месяц</h2>
 <div class="table-container">
     <div class="event-table">
-        <#list report as date, events>
+        <#list report as item>
             <div class="date-column">
                 <div class="date-title">
-                    ${date}
+                    ${item.name}
                 </div>
-                <#list events as event>
-                    <#if event.header == true>
-                        <div class="event-header">${event.title}</div>
+                <#list item.records as record>
+                    <#if record.header == true>
+                        <div class="event-header">${record.title}</div>
                     <#else>
-                       <div class="event-title">${event.title}</div>
+                       <div class="event-title">${record.title}</div>
                     </#if>
                 </#list>
             </div>

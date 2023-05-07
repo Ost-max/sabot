@@ -2,12 +2,18 @@ package dev.ostmax.sabot.client;
 
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static dev.ostmax.sabot.client.BotCommands.HELP;
+import static dev.ostmax.sabot.client.BotCommands.MY_EVENTS;
+import static dev.ostmax.sabot.client.BotCommands.SCHEDULE_REPORT;
 
 @Component
 public class Buttons {
@@ -19,8 +25,13 @@ public class Buttons {
             .callbackData(BotCommands.REGISTER_FOR_EVENT)
             .build();
 
+    public static final InlineKeyboardButton START = InlineKeyboardButton.builder()
+            .text("Главное меню")
+            .callbackData(BotCommands.START)
+            .build();
+
     private static final InlineKeyboardButton HELP_BUTTON = new InlineKeyboardButton("Помощь");
-    private static final InlineKeyboardButton MY_EVENTS_BUTTON = new InlineKeyboardButton("Мероприятия где я участвую");
+    private static final InlineKeyboardButton MY_EVENTS_BUTTON = new InlineKeyboardButton("Когда я служу?");
     private static final InlineKeyboardButton MONTH_EVENTS_BUTTON = new InlineKeyboardButton("Расписание на месяц");
 
     //Admin
@@ -34,11 +45,14 @@ public class Buttons {
 
     public InlineKeyboardMarkup mainMenu() {
         HELP_BUTTON.setCallbackData(HELP);
-        MONTH_EVENTS_BUTTON.setUrl(config.getReportingUrl() + "/report/events/month");
+        MONTH_EVENTS_BUTTON.setCallbackData(SCHEDULE_REPORT);
+        MY_EVENTS_BUTTON.setCallbackData(MY_EVENTS);
         List<List<InlineKeyboardButton>> rowsInLine = List.of(
                 List.of(HELP_BUTTON),
                 List.of(MONTH_EVENTS_BUTTON),
-                List.of(REGISTER_FOR_EVENT)
+                List.of(REGISTER_FOR_EVENT),
+                List.of(MY_EVENTS_BUTTON)
+
         );
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         markupInline.setKeyboard(rowsInLine);
@@ -51,6 +65,23 @@ public class Buttons {
         return markupInline;
     }
 
+    public static InlineKeyboardMarkup of(InlineKeyboardButton button) {
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        markupInline.setKeyboard(List.of(List.of(button)));
+        return markupInline;
+    }
+
+    public static ReplyKeyboard reply(List<KeyboardButton> buttons) {
+        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+        replyKeyboardMarkup.setKeyboard(List.of(new KeyboardRow(buttons)));
+        return replyKeyboardMarkup;
+    }
+
+    public static InlineKeyboardMarkup start() {
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        markupInline.setKeyboard(List.of(List.of(START)));
+        return markupInline;
+    }
 
     public static InlineKeyboardMarkup fromTitles(List<String> strings) {
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();

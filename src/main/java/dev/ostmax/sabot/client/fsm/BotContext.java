@@ -17,6 +17,7 @@ public class BotContext {
     private TelegramBotClient client;
     private User user;
     private long chatId;
+    private Integer messageId;
     private String message;
     private String callbackQuery;
     private String nick;
@@ -29,6 +30,10 @@ public class BotContext {
 
     public void sendMessage(String text, ReplyKeyboard keyboard) {
         client.sendMessage(chatId, text, keyboard);
+    }
+
+    public void sendReplyMessage(String text, ReplyKeyboard keyboard) {
+        client.sendMessage(chatId, text, keyboard, messageId);
     }
 
 }

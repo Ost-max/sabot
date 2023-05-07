@@ -9,6 +9,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -40,6 +41,8 @@ public class EventItem {
     }
     @Embeddable
     @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class Id implements Serializable {
         @Column(name = "user_id")
         protected UUID userId;

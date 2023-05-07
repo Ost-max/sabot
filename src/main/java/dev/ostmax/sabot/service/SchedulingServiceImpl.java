@@ -56,6 +56,7 @@ public class SchedulingServiceImpl implements SchedulingService {
     }
 
     @Scheduled(cron = "0 0 13 L-2 * *")
+    @Override
     @Transactional
     public void notifyUsersAboutRegistrationForEvent() {
         userService.getAllActiveUsers().forEach(user -> {

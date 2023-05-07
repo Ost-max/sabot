@@ -3,6 +3,7 @@ package dev.ostmax.sabot.model;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
@@ -13,6 +14,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -47,5 +50,9 @@ public class User {
     private String stateId;
     private boolean isAdmin;
     @Column(name = "active", nullable = false, columnDefinition = "bool default true")
-    private boolean active;
+    private boolean active = true;
+    @Column(name = "blocked", nullable = false, columnDefinition = "bool default false")
+    private boolean blocked = false;
+    @CreatedDate
+    private LocalDate createdDate;
 }

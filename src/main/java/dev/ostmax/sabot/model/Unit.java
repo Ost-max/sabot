@@ -19,7 +19,7 @@ public class Unit {
     private String name;
     @OneToMany
     private List<User> users;
-    @OneToMany
+    @OneToMany(mappedBy = "unit")
     private List<EventTemplate> eventTemplates;
 
     @Override

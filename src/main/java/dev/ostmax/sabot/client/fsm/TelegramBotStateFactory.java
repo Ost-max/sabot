@@ -13,7 +13,6 @@ import java.util.Optional;
 @Slf4j
 public class TelegramBotStateFactory {
 
-
     private final ApplicationContext applicationContext;
     private final UserService userService;
 
@@ -25,7 +24,6 @@ public class TelegramBotStateFactory {
 
     public BotState getState(BotContext context) {
         log.info("get messages {} hasCallbackQuery {}", context.getMessage(), context.isHasCallbackQuery());
-
         Optional<User> userTest = userService.findByTelegramId(context.getUserId());
         if (userTest.isEmpty()) {
             return applicationContext.getBean(NewUserState.class);
@@ -35,7 +33,8 @@ public class TelegramBotStateFactory {
             if (user.isAdmin()) {
                 return applicationContext.getBean(AdminState.class);
             }
-            if("/start".equals(context.getMessage())) {
+            //TODO refactor this
+            if("/start".equals(context.getMessage()) && user.getName() != null) {
                 user.setStateId(null);
                 userService.save(user);
                 return applicationContext.getBean(CommonUserState.class);

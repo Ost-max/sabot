@@ -11,8 +11,9 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -26,19 +27,19 @@ public interface EventService {
                                  LocalTime occursTime,
                                  Regularity regularity);
 
-    Collection<EventTemplate> getUnitEvents(UUID unitId);
-
     @Transactional
     EventItem registerToEvent(long templateId, User user, LocalDateTime localDateTime);
 
     @Transactional
-    EventItem registerToEvent(long eventId, User user);
+    Optional<EventItem> unregister(long templateId, User user, LocalDateTime localDateTime);
 
-    Collection<LocalDate> getAllRegularEventDatesForNextPeriod(UUID unitId, LocalDate date, Regularity regularity);
+    Set<LocalDate> getAllRegularEventDatesForNextPeriod(UUID unitId, LocalDate date, Regularity regularity);
 
-    Map<LocalTime, Set<GroupEvent>> getEventsWithParticipantsForConcreteDate(UUID unitId, LocalDate date);
+    Map<LocalDateTime, Set<GroupEvent>> getEventsWithParticipantsForConcreteDate(UUID unitId, LocalDate date);
 
     Set<EventItem> getEventsForConcreteDate(UUID unitId, LocalDate date);
+
+    List<EventItem> getFutureUserEvent(User user);
 
 
     // Event with lack of participants, date is optional

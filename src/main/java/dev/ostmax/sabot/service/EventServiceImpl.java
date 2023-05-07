@@ -16,13 +16,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 
 @Service
@@ -54,10 +54,6 @@ public class EventServiceImpl implements EventService {
 
     }
 
-    @Override
-    public Collection<EventTemplate> getUnitEvents(UUID unitId) {
-        return this.eventTemplateRepository.findAllByUnitId(unitId);
-    }
 
     @Override
     public EventItem registerToEvent(long templateId, User user, LocalDateTime localDateTime) {
@@ -74,20 +70,16 @@ public class EventServiceImpl implements EventService {
        return null;
     }
 
-
     @Override
-    public EventItem registerToEvent(long eventId, User user) {
-        Optional<EventItem> event = eventRepository.findById(eventId);
-        throw new UnsupportedOperationException();
-/*        if(event.isPresent()) {
-            event.get().getUser().add(user);
-            return this.eventRepository.save(event.get());
-        }
-        return null;*/
+    public Optional<EventItem> unregister(long templateId, User user, LocalDateTime time) {
+        var event = eventRepository.findById(new EventItem.Id(user.getId(), templateId, time));
+        event.ifPresent(eventRepository::delete);
+        return event;
     }
 
+
     @Override
-    public Collection<LocalDate> getAllRegularEventDatesForNextPeriod(UUID unitId, LocalDate date, Regularity regularity) {
+    public Set<LocalDate> getAllRegularEventDatesForNextPeriod(UUID unitId, LocalDate date, Regularity regularity) {
         return  eventTemplateRepository
                 .findAllByUnitId(unitId)
                 .stream()
@@ -98,7 +90,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Map<LocalTime, Set<GroupEvent>> getEventsWithParticipantsForConcreteDate(UUID unitId, LocalDate date) {
+    public Map<LocalDateTime, Set<GroupEvent>> getEventsWithParticipantsForConcreteDate(UUID unitId, LocalDate date) {
         Collection<EventTemplate> templates = eventTemplateRepository.findAllByUnitIdAndOccursDayOfWeek(unitId, date.getDayOfWeek());
 
         var existEventMap = eventRepository.findEventsByTimeBetweenAndTemplateIdIn(date.atStartOfDay(), date.atTime(23, 59), templates.stream().map(EventTemplate::getId).collect(toSet()))
@@ -130,7 +122,7 @@ public class EventServiceImpl implements EventService {
         return gropEvents
                 .stream()
                 .collect(Collectors.groupingBy(
-                        event -> event.getTime().toLocalTime(),
+                        event -> event.getTime(),
                         Collectors.mapping(
                                 event -> event,
                                 Collectors.toSet()
@@ -138,10 +130,15 @@ public class EventServiceImpl implements EventService {
                 ));
     }
 
-        @Override
+    @Override
     public Set<EventItem> getEventsForConcreteDate(UUID unitId, LocalDate date) {
         Set<EventTemplate> templates = eventTemplateRepository.findAllByUnitIdAndOccursDayOfWeek(unitId, date.getDayOfWeek());
         return eventRepository.findEventsByTimeBetweenAndTemplateIdIn(date.atStartOfDay(), date.atTime(23, 59), templates.stream().map(EventTemplate::getId).collect(toSet()));
+    }
+
+    @Override
+    public List<EventItem> getFutureUserEvent(User user) {
+        return eventRepository.findEventItemByUserAndTimeAfter(user, LocalDateTime.now());
     }
 
 }
