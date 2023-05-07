@@ -1,5 +1,6 @@
 package dev.ostmax.sabot.client.fsm;
 
+import dev.ostmax.sabot.client.BotContext;
 import dev.ostmax.sabot.service.EventService;
 import dev.ostmax.sabot.service.time.DateTimeUtils;
 import org.springframework.stereotype.Component;

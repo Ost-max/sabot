@@ -1,9 +1,9 @@
 package dev.ostmax.sabot.client;
 
-import dev.ostmax.sabot.client.fsm.BotContext;
 import dev.ostmax.sabot.client.fsm.TelegramBotStateFactory;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Scope;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -22,7 +22,7 @@ import static dev.ostmax.sabot.client.BotCommands.LIST_OF_COMMANDS;
 
 @Slf4j
 @Component
-public class TelegramBotClient extends TelegramLongPollingBot {
+public class TelegramBotClient extends TelegramLongPollingBot implements MessageClient{
 
     private final TelegramClientProperties config;
     private final TelegramBotStateFactory telegramBotStateFactory;
@@ -90,6 +90,12 @@ public class TelegramBotClient extends TelegramLongPollingBot {
     public void sendMessage(long chatId, String text) {
         sendMessage(chatId, text, null);
     }
+
+    @Override
+    public void sendMessage(long chatId, String text, Object params) {
+        sendMessage(chatId, text, (ReplyKeyboard) params);
+    }
+
     public void sendMessage(long chatId, String text, ReplyKeyboard replyKeyboard) {
         sendMessage(chatId, text, replyKeyboard, null);
     }

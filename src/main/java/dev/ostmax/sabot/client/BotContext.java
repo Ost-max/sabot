@@ -1,4 +1,4 @@
-package dev.ostmax.sabot.client.fsm;
+package dev.ostmax.sabot.client;
 
 import dev.ostmax.sabot.client.TelegramBotClient;
 import dev.ostmax.sabot.model.User;
@@ -14,7 +14,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 @Builder
 public class BotContext {
 
-    private TelegramBotClient client;
+    private MessageClient client;
     private User user;
     private long chatId;
     private Integer messageId;
@@ -32,8 +32,8 @@ public class BotContext {
         client.sendMessage(chatId, text, keyboard);
     }
 
-    public void sendReplyMessage(String text, ReplyKeyboard keyboard) {
+  /*  public void sendReplyMessage(String text, ReplyKeyboard keyboard) {
         client.sendMessage(chatId, text, keyboard, messageId);
-    }
+    }*/
 
 }

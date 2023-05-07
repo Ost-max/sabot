@@ -1,5 +1,6 @@
 package dev.ostmax.sabot.client.fsm;
 
+import dev.ostmax.sabot.client.BotContext;
 import dev.ostmax.sabot.client.Buttons;
 import org.springframework.stereotype.Component;
 

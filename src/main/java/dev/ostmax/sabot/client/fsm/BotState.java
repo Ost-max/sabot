@@ -1,6 +1,6 @@
 package dev.ostmax.sabot.client.fsm;
 
-import dev.ostmax.sabot.client.TelegramBotClient;
+import dev.ostmax.sabot.client.BotContext;
 
 public interface BotState {
 

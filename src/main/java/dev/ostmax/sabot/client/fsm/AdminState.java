@@ -1,5 +1,6 @@
 package dev.ostmax.sabot.client.fsm;
 
+import dev.ostmax.sabot.client.BotContext;
 import dev.ostmax.sabot.model.User;
 import dev.ostmax.sabot.service.RegistrationService;
 import org.springframework.stereotype.Component;

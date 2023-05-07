@@ -1,6 +1,7 @@
 package dev.ostmax.sabot.client.fsm;
 
 import dev.ostmax.sabot.client.BotCommands;
+import dev.ostmax.sabot.client.BotContext;
 import dev.ostmax.sabot.client.Buttons;
 import dev.ostmax.sabot.model.EventItem;
 import dev.ostmax.sabot.service.ReportService;
