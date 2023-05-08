@@ -1,4 +1,4 @@
-package dev.ostmax.sabot.client.fsm;
+package dev.ostmax.sabot.client.fsm.states;
 
 import dev.ostmax.sabot.client.BotContext;
 import dev.ostmax.sabot.model.User;
@@ -19,7 +19,7 @@ public class NewUserState implements BotState {
     private final UserService userService;
 
 
-    public NewUserState(UserService userService, UserRegistrationState userRegistrationState) {
+    public NewUserState(UserService userService) {
         this.userService = userService;
     }
 
@@ -27,7 +27,9 @@ public class NewUserState implements BotState {
     public BotState handleCommand(BotContext context) {
         context.setUser(User.builder().telegramId(context.getUserId()).nick(context.getNick()).stateId(UserRegistrationState.STATE_ID).build());
         context.getClient().sendMessage(context.getChatId(), MessageFormat.format(FIRST_GREETINGS, context.getNick()));
-        userService.save(context.getUser());
+        if(userService.findByTelegramId(context.getUserId()).isEmpty()) {
+            userService.save(context.getUser());
+        }
         return null;
     }
 

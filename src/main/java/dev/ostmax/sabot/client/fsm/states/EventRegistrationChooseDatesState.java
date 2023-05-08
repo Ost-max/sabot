@@ -1,7 +1,9 @@
-package dev.ostmax.sabot.client.fsm;
+package dev.ostmax.sabot.client.fsm.states;
 
+import dev.ostmax.sabot.client.BotCommands;
 import dev.ostmax.sabot.client.BotContext;
 import dev.ostmax.sabot.client.Buttons;
+import dev.ostmax.sabot.client.BotCommand;
 import dev.ostmax.sabot.model.Regularity;
 import dev.ostmax.sabot.model.User;
 import dev.ostmax.sabot.service.EventService;
@@ -22,7 +24,7 @@ import static java.time.temporal.TemporalAdjusters.firstDayOfMonth;
 
 @Component
 @Slf4j
-public class EventRegistrationChooseDatesState implements BotState {
+public class EventRegistrationChooseDatesState implements BotState, BotCommand {
 
     private final UserService userService;
     private final EventService eventService;
@@ -70,5 +72,15 @@ public class EventRegistrationChooseDatesState implements BotState {
     @Override
     public String getStateId() {
         return null;
+    }
+
+    @Override
+    public String getCommandName() {
+        return BotCommands.REGISTER_FOR_EVENT;
+    }
+
+    @Override
+    public BotState getState() {
+        return this;
     }
 }

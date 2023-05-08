@@ -1,8 +1,9 @@
-package dev.ostmax.sabot.client.fsm;
+package dev.ostmax.sabot.client.fsm.states;
 
 import dev.ostmax.sabot.client.BotCommands;
 import dev.ostmax.sabot.client.BotContext;
 import dev.ostmax.sabot.client.Buttons;
+import dev.ostmax.sabot.client.BotCommand;
 import dev.ostmax.sabot.model.EventItem;
 import dev.ostmax.sabot.service.ReportService;
 import dev.ostmax.sabot.service.time.DateTimeUtils;
@@ -13,7 +14,7 @@ import static dev.ostmax.sabot.client.Buttons.REGISTER_FOR_EVENT;
 
 
 @Component
-public class MyEventsReportState implements BotState {
+public class MyEventsReportState implements BotState, BotCommand {
 
     private final ReportService reportService;
     private static final String NO_EVENTS_YET = "Вы ещё не записались ни на одно служение";
@@ -49,5 +50,15 @@ public class MyEventsReportState implements BotState {
     @Override
     public String getStateId() {
         return null;
+    }
+
+    @Override
+    public String getCommandName() {
+        return BotCommands.MY_EVENTS;
+    }
+
+    @Override
+    public BotState getState() {
+        return this;
     }
 }

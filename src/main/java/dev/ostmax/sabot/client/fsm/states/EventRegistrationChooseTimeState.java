@@ -1,4 +1,4 @@
-package dev.ostmax.sabot.client.fsm;
+package dev.ostmax.sabot.client.fsm.states;
 
 import dev.ostmax.sabot.client.BotCommands;
 import dev.ostmax.sabot.client.BotContext;

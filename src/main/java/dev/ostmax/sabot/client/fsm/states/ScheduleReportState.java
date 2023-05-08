@@ -1,8 +1,10 @@
-package dev.ostmax.sabot.client.fsm;
+package dev.ostmax.sabot.client.fsm.states;
 
+import dev.ostmax.sabot.client.BotCommands;
 import dev.ostmax.sabot.client.BotContext;
 import dev.ostmax.sabot.client.Buttons;
 import dev.ostmax.sabot.client.TelegramClientProperties;
+import dev.ostmax.sabot.client.BotCommand;
 import dev.ostmax.sabot.service.time.DateTimeUtils;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -12,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class ScheduleReportState implements BotState{
+public class ScheduleReportState implements BotState, BotCommand {
 
     private final TelegramClientProperties config;
 
@@ -44,5 +46,15 @@ public class ScheduleReportState implements BotState{
     @Override
     public String getStateId() {
         return STATE_ID;
+    }
+
+    @Override
+    public String getCommandName() {
+        return BotCommands.SCHEDULE_REPORT;
+    }
+
+    @Override
+    public BotState getState() {
+        return this;
     }
 }

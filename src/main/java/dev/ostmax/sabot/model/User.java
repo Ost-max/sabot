@@ -50,9 +50,9 @@ public class User {
     private String stateId;
     private boolean isAdmin;
     @Column(name = "active", nullable = false, columnDefinition = "bool default true")
-    private boolean active = true;
+    private boolean active;
     @Column(name = "blocked", nullable = false, columnDefinition = "bool default false")
-    private boolean blocked = false;
+    private boolean blocked;
     @CreatedDate
     private LocalDate createdDate;
 }

@@ -1,12 +1,23 @@
 package dev.ostmax.sabot.client.fsm;
 
 import dev.ostmax.sabot.client.BotContext;
+import dev.ostmax.sabot.client.fsm.states.AdminState;
+import dev.ostmax.sabot.client.fsm.states.BotState;
+import dev.ostmax.sabot.client.fsm.states.EventRegistrationChooseTimeState;
+import dev.ostmax.sabot.client.fsm.states.EventRegistrationSaveState;
+import dev.ostmax.sabot.client.fsm.states.NewUserState;
+import dev.ostmax.sabot.client.fsm.states.StartState;
+import dev.ostmax.sabot.client.fsm.states.UnknownCommandState;
+import dev.ostmax.sabot.client.fsm.states.UserRegistrationState;
 import dev.ostmax.sabot.model.User;
 import dev.ostmax.sabot.service.UserService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
 import java.util.Optional;
 
 
@@ -17,9 +28,15 @@ public class TelegramBotStateFactory {
     private final ApplicationContext applicationContext;
     private final UserService userService;
 
-    public TelegramBotStateFactory(ApplicationContext applicationContext, UserService userService) {
+    private final Map<String, BotState> statesByCommandName;
+
+    private final Map<String, BotState> statesByStateId;
+
+    public TelegramBotStateFactory(ApplicationContext applicationContext, UserService userService, @Qualifier("statesByCommandName") Map<String, BotState> statesByCommandName, @Qualifier("statesByStateId") Map<String, BotState> statesByStateId) {
         this.applicationContext = applicationContext;
         this.userService = userService;
+        this.statesByCommandName = statesByCommandName;
+        this.statesByStateId = statesByStateId;
     }
 
 
@@ -31,42 +48,23 @@ public class TelegramBotStateFactory {
         } else {
             User user = userTest.get();
             context.setUser(user);
-            if (user.isAdmin()) {
-                return applicationContext.getBean(AdminState.class);
+
+            BotState command = statesByCommandName.get(context.getMessage());
+            if (command != null) {
+                log.info("state by command {}", command);
+                return command;
             }
-            //TODO refactor this
-            if("/start".equals(context.getMessage()) && user.getName() != null) {
-                user.setStateId(null);
-                userService.save(user);
-                return applicationContext.getBean(CommonUserState.class);
-            }
-            BotState savedUserState = getSavedUserState(user.getStateId());
+
+            BotState savedUserState = statesByStateId.get(user.getStateId());
             log.info("stateID {}", user.getStateId());
 
             if (savedUserState != null) {
                 log.info("savedUserState {}", savedUserState);
                 return savedUserState;
             }
-            if (context.getMessage().startsWith("/")) {
-                return applicationContext.getBean(CommonUserState.class);
-            }
+
             return applicationContext.getBean(UnknownCommandState.class);
         }
     }
-
-    private BotState getSavedUserState(String stateId) {
-        BotState state = null;
-        if(stateId == null) {
-            return null;
-        }
-        switch (stateId) {
-            case UserRegistrationState.STATE_ID -> state = applicationContext.getBean(UserRegistrationState.class);
-            case CommonUserState.STATE_ID -> state = applicationContext.getBean(CommonUserState.class);
-            case EventRegistrationChooseTimeState.STATE_ID -> state = applicationContext.getBean(EventRegistrationChooseTimeState.class);
-            case EventRegistrationSaveState.STATE_ID -> state = applicationContext.getBean(EventRegistrationSaveState.class);
-        }
-        return state;
-    }
-
 
 }

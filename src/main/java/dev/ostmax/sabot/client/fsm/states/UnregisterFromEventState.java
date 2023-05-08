@@ -1,6 +1,8 @@
-package dev.ostmax.sabot.client.fsm;
+package dev.ostmax.sabot.client.fsm.states;
 
+import dev.ostmax.sabot.client.BotCommands;
 import dev.ostmax.sabot.client.BotContext;
+import dev.ostmax.sabot.client.BotCommand;
 import dev.ostmax.sabot.service.EventService;
 import dev.ostmax.sabot.service.time.DateTimeUtils;
 import org.springframework.stereotype.Component;
@@ -8,7 +10,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 
 @Component
-public class UnregisterFromEventState implements BotState {
+public class UnregisterFromEventState implements BotState, BotCommand {
 
     private final EventService eventService;
 
@@ -29,5 +31,15 @@ public class UnregisterFromEventState implements BotState {
     @Override
     public String getStateId() {
         return null;
+    }
+
+    @Override
+    public String getCommandName() {
+        return BotCommands.UNREGISTER_FROM_EVENT;
+    }
+
+    @Override
+    public BotState getState() {
+        return this;
     }
 }

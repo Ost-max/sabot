@@ -1,4 +1,4 @@
-package dev.ostmax.sabot.client.fsm;
+package dev.ostmax.sabot.client.fsm.states;
 
 import dev.ostmax.sabot.client.BotCommands;
 import dev.ostmax.sabot.client.BotContext;
@@ -18,14 +18,14 @@ public class EventRegistrationSaveState implements BotState {
     private final EventService eventService;
     private final UserService userService;
     private final UnknownCommandState unknownCommandState;
-    private final CommonUserState commonUserState;
+    private final StartState startState;
 
 
-    public EventRegistrationSaveState(EventService eventService, UserService userService, UnknownCommandState unknownCommandState, CommonUserState commonUserState) {
+    public EventRegistrationSaveState(EventService eventService, UserService userService, UnknownCommandState unknownCommandState, StartState startState) {
         this.eventService = eventService;
         this.userService = userService;
         this.unknownCommandState = unknownCommandState;
-        this.commonUserState = commonUserState;
+        this.startState = startState;
     }
 
     @Override
@@ -41,7 +41,7 @@ public class EventRegistrationSaveState implements BotState {
             userService.save(botContext.getUser());
             botContext.sendMessage("Спасибо, Вы успешно зарегистрировалсись: " + event.getName() + " " + event.getTime().toLocalDate() + " " + event.getTime().toLocalTime());
             botContext.setMessage(BotCommands.START);
-            return commonUserState;
+            return startState;
         }
         return unknownCommandState;
     }

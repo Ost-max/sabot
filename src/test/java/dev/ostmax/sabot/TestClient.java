@@ -20,11 +20,13 @@ public class TestClient implements MessageClient {
 
     @Override
     public void sendMessage(long chatId, String text) {
+        System.out.println("to chatId: " + chatId + " text: " + text);
         sendMessage.perform(chatId, text);
     }
 
     @Override
     public void sendMessage(long chatId, String text, Object params) {
+        System.out.println("to chatId: " + chatId + " text: " + text + " params: " + params);
         sendMessageWithParams.perform(chatId, text, params);
     }
 }
