@@ -69,8 +69,7 @@ public class UserRegistrationState implements BotState {
                     return startState;
                 }
             } catch (DateTimeParseException exception) {
-                botContext.getClient().sendMessage(botContext.getChatId(), ERROR_PHONE_MSG);
-
+                botContext.getClient().sendMessage(botContext.getChatId(), ERROR_DATE_MSG);
             }
         }
         return null;

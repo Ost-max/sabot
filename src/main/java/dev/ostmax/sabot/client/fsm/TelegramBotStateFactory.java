@@ -49,7 +49,7 @@ public class TelegramBotStateFactory {
             User user = userTest.get();
             context.setUser(user);
 
-            BotState command = statesByCommandName.get(context.getMessage());
+            BotState command = statesByCommandName.get(context.getMessage().split(" ")[0]);
             if (command != null) {
                 log.info("state by command {}", command);
                 return command;

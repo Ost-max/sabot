@@ -18,7 +18,6 @@ public class NewUserState implements BotState {
             "Для начала давайте познакомимся. Для продолжения введите ваще ФИО. Например Иванов Иван Иванович:";
     private final UserService userService;
 
-
     public NewUserState(UserService userService) {
         this.userService = userService;
     }
@@ -26,7 +25,7 @@ public class NewUserState implements BotState {
     @Override
     public BotState handleCommand(BotContext context) {
         context.setUser(User.builder().telegramId(context.getUserId()).nick(context.getNick()).stateId(UserRegistrationState.STATE_ID).build());
-        context.getClient().sendMessage(context.getChatId(), MessageFormat.format(FIRST_GREETINGS, context.getNick()));
+        context.getClient().sendMessage(context.getChatId(), MessageFormat.format(FIRST_GREETINGS, context.getNick() != null ));
         if(userService.findByTelegramId(context.getUserId()).isEmpty()) {
             userService.save(context.getUser());
         }

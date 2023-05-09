@@ -74,7 +74,11 @@ public class TelegramBotClient extends TelegramLongPollingBot implements Message
             botContextBuilder.message(update.getMessage().getText());
             botContextBuilder.chatId(update.getMessage().getChatId());
             botContextBuilder.userId(update.getMessage().getFrom().getId());
-            botContextBuilder.nick(update.getMessage().getFrom().getUserName());
+            if(update.getMessage().getFrom().getUserName() != null) {
+                botContextBuilder.nick(update.getMessage().getFrom().getUserName());
+            } else {
+                botContextBuilder.nick(update.getMessage().getFrom().getFirstName());
+            }
         } else if (update.hasCallbackQuery()) {
             botContextBuilder.messageId(update.getCallbackQuery().getMessage().getMessageId());
             botContextBuilder.hasCallbackQuery(true);
@@ -82,7 +86,11 @@ public class TelegramBotClient extends TelegramLongPollingBot implements Message
             botContextBuilder.callbackQuery(update.getCallbackQuery().getData());
             botContextBuilder.chatId(update.getCallbackQuery().getMessage().getChatId());
             botContextBuilder.userId(update.getCallbackQuery().getFrom().getId());
-            botContextBuilder.nick(update.getCallbackQuery().getFrom().getUserName());
+            if(update.getCallbackQuery().getFrom().getUserName() != null) {
+                botContextBuilder.nick(update.getCallbackQuery().getFrom().getUserName());
+            } else {
+                botContextBuilder.nick(update.getCallbackQuery().getFrom().getFirstName());
+            }
         }
         botContextBuilder.client(this);
         return botContextBuilder.build();

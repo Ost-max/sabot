@@ -20,7 +20,6 @@ public class StartState implements BotState, BotCommand {
         this.newUserState = newUserState;
     }
 
-
     @Override
     public String getCommandName() {
         return BotCommands.START;
@@ -33,7 +32,6 @@ public class StartState implements BotState, BotCommand {
 
     @Override
     public BotState handleCommand(BotContext botContext) {
-        //TODO refactor this
         if(botContext.getUser().getCreatedDate() != null) {
             botContext.getUser().setStateId(null);
             userService.save(botContext.getUser());
