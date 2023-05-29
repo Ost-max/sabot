@@ -3,7 +3,9 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 sabot-postgres-data/
-docker-compose.yml
+/docker-compose.yml
+/docker-compose-dev.yml
+/src/main/resources/liquibase.properties
 
 ### STS ###
 .apt_generated
