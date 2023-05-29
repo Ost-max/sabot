@@ -4,7 +4,6 @@ import dev.ostmax.sabot.model.EventTemplate;
 import dev.ostmax.sabot.model.Regularity;
 import dev.ostmax.sabot.model.Unit;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
@@ -12,7 +11,6 @@ import org.springframework.stereotype.Component;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.Optional;
-import java.util.UUID;
 
 import static dev.ostmax.sabot.repository.UnitRepository.DEFAULT_UNIT_ID;
 

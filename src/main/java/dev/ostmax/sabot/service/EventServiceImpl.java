@@ -4,10 +4,13 @@ import dev.ostmax.sabot.model.EventItem;
 import dev.ostmax.sabot.model.EventTemplate;
 import dev.ostmax.sabot.model.GroupEvent;
 import dev.ostmax.sabot.model.Regularity;
+import dev.ostmax.sabot.model.Unit;
 import dev.ostmax.sabot.model.User;
 import dev.ostmax.sabot.repository.EventRepository;
 import dev.ostmax.sabot.repository.EventTemplateRepository;
+import dev.ostmax.sabot.repository.UnitRepository;
 import dev.ostmax.sabot.service.time.AllSpecificDaysInAMonthQuery;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +25,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static java.time.temporal.TemporalAdjusters.lastDayOfMonth;
 import static java.util.stream.Collectors.toSet;
 
 @Service
@@ -31,10 +36,12 @@ public class EventServiceImpl implements EventService {
 
     private final EventTemplateRepository eventTemplateRepository;
     private final EventRepository eventRepository;
+    private final UnitRepository unitRepository;
 
-    public EventServiceImpl(EventTemplateRepository eventTemplateRepository, EventRepository eventRepository) {
+    public EventServiceImpl(EventTemplateRepository eventTemplateRepository, EventRepository eventRepository, UnitRepository unitRepository) {
         this.eventTemplateRepository = eventTemplateRepository;
         this.eventRepository = eventRepository;
+        this.unitRepository = unitRepository;
     }
 
     @Override
@@ -44,9 +51,10 @@ public class EventServiceImpl implements EventService {
                                         DayOfWeek dayOfWeek,
                                         LocalTime occursTime,
                                         Regularity regularity) {
-
+        Optional<Unit> unit = unitRepository.findById(unitId);
         return this.eventTemplateRepository.save(EventTemplate.builder()
                 .name(name)
+                .unit(unitRepository.findById(unitId).get())
                 .demand(demand)
                 .occursDayOfWeek(dayOfWeek)
                 .occursTime(occursTime)
@@ -91,7 +99,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Map<LocalDateTime, Set<GroupEvent>> getEventsWithParticipantsForConcreteDate(UUID unitId, LocalDate date) {
-        Collection<EventTemplate> templates = eventTemplateRepository.findAllByUnitIdAndOccursDayOfWeek(unitId, date.getDayOfWeek());
+        Collection<EventTemplate> templates = eventTemplateRepository.findAllByUnitIdAndOccursDayOfWeekByEffectiveDate(unitId, date.getDayOfWeek(), date);
 
         var existEventMap = eventRepository.findEventsByTimeBetweenAndTemplateIdIn(date.atStartOfDay(), date.atTime(23, 59), templates.stream().map(EventTemplate::getId).collect(toSet()))
                 .stream()
@@ -131,14 +139,24 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Set<EventItem> getEventsForConcreteDate(UUID unitId, LocalDate date) {
-        Set<EventTemplate> templates = eventTemplateRepository.findAllByUnitIdAndOccursDayOfWeek(unitId, date.getDayOfWeek());
-        return eventRepository.findEventsByTimeBetweenAndTemplateIdIn(date.atStartOfDay(), date.atTime(23, 59), templates.stream().map(EventTemplate::getId).collect(toSet()));
+    public List<EventItem> getFutureUserEvent(User user) {
+        return eventRepository.findEventItemByUserIdAndTimeAfter(user.getId(), LocalDateTime.now());
     }
 
     @Override
-    public List<EventItem> getFutureUserEvent(User user) {
-        return eventRepository.findEventItemByUserAndTimeAfter(user, LocalDateTime.now());
+    @Transactional
+    public Stream<EventItem> getAllEventsForNextMonthByUnitId(UUID unitId) {
+        LocalDateTime start = LocalDateTime.now();
+        LocalDateTime end = LocalDate.now().plusMonths(1).with(lastDayOfMonth()).atTime(LocalTime.MAX);
+        return eventRepository.findEventsByTimeBetween(start, end, unitId);
+    }
+
+    @Override
+    @Transactional
+    public Set<EventItem> getAllEventsForNextDate(UUID unitId) {
+        LocalDateTime start = LocalDateTime.now();
+        LocalDateTime end = LocalDate.now().plusDays(1).atTime(LocalTime.MAX);
+        return eventRepository.findEventsByTimeBetween(start, end, unitId).collect(toSet());
     }
 
 }

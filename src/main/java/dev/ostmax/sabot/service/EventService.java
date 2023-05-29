@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 public interface EventService {
 
@@ -37,10 +38,11 @@ public interface EventService {
 
     Map<LocalDateTime, Set<GroupEvent>> getEventsWithParticipantsForConcreteDate(UUID unitId, LocalDate date);
 
-    Set<EventItem> getEventsForConcreteDate(UUID unitId, LocalDate date);
-
     List<EventItem> getFutureUserEvent(User user);
 
+    @Transactional
+    Stream<EventItem> getAllEventsForNextMonthByUnitId(UUID unitId);
 
-    // Event with lack of participants, date is optional
+    @Transactional
+    Set<EventItem> getAllEventsForNextDate(UUID unitId);
 }

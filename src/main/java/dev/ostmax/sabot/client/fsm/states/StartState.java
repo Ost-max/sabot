@@ -12,12 +12,10 @@ public class StartState implements BotState, BotCommand {
 
     private final Buttons buttons;
     private final UserService userService;
-    private final NewUserState newUserState;
 
-    public StartState(Buttons buttons, UserService userService, NewUserState newUserState) {
+    public StartState(Buttons buttons, UserService userService) {
         this.buttons = buttons;
         this.userService = userService;
-        this.newUserState = newUserState;
     }
 
     @Override
@@ -32,12 +30,8 @@ public class StartState implements BotState, BotCommand {
 
     @Override
     public BotState handleCommand(BotContext botContext) {
-        if(botContext.getUser().getCreatedDate() != null) {
-            botContext.getUser().setStateId(null);
-            userService.save(botContext.getUser());
-        } else {
-            return newUserState;
-        }
+        botContext.getUser().setStateId(null);
+        userService.save(botContext.getUser());
         botContext.sendMessage("Выберете действие", buttons.mainMenu());
         return null;
     }

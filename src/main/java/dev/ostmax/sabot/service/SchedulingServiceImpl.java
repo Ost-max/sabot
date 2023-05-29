@@ -1,7 +1,7 @@
 package dev.ostmax.sabot.service;
 
 import dev.ostmax.sabot.client.Buttons;
-import dev.ostmax.sabot.client.TelegramBotClient;
+import dev.ostmax.sabot.client.MessageClient;
 import dev.ostmax.sabot.model.EventItem;
 import dev.ostmax.sabot.repository.UnitRepository;
 import jakarta.transaction.Transactional;
@@ -12,10 +12,11 @@ import org.springframework.stereotype.Service;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -24,14 +25,13 @@ public class SchedulingServiceImpl implements SchedulingService {
     private final EventService eventService;
     private final UserService userService;
 
-
-    private final TelegramBotClient telegramBotClient;
+    private final MessageClient telegramBotClient;
     private static final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd MMMM HH:mm").withLocale(Locale.of("RU"));
     private static final String NOTIFY_EVENT_MESSAGE = "Уважаемый(ая) {0} вы записаны на служение {1} которое состоится {2}";
     private static final String NOTIFY_REGISTRATION_MESSAGE = "Уважаемый(ая) {0}, начинается новый месяц, не забудьте зарегистрироваться на служение.";
 
 
-    public SchedulingServiceImpl(EventService eventService, UserService userService, TelegramBotClient telegramBotClient) {
+    public SchedulingServiceImpl(EventService eventService, UserService userService, MessageClient telegramBotClient) {
         this.eventService = eventService;
         this.userService = userService;
         this.telegramBotClient = telegramBotClient;
@@ -41,9 +41,7 @@ public class SchedulingServiceImpl implements SchedulingService {
     @Scheduled(cron = "0 0 13 * * *")
     @Transactional
     public void notifyUsersBeforeEvent() {
-        var queryDate = LocalDate.now().plus(1, ChronoUnit.DAYS);
-        log.info("queryDate: " + queryDate.toString());
-        Set<EventItem> events = eventService.getEventsForConcreteDate(UnitRepository.DEFAULT_UNIT_ID, queryDate);
+        Set<EventItem> events = eventService.getAllEventsForNextDate(UnitRepository.DEFAULT_UNIT_ID);
         log.info("events: " + events.size());
         events.forEach(event -> {
                     log.info("events {} users {}", event.getName() + " " + event.getTime() + " ", event.getUser());
@@ -55,11 +53,14 @@ public class SchedulingServiceImpl implements SchedulingService {
         );
     }
 
-    @Scheduled(cron = "0 0 13 L-2 * *")
     @Override
+    @Scheduled(cron = "0 0 13 L-2 * *")
+    @Scheduled(cron = "0 0 13 L * *")
     @Transactional
     public void notifyUsersAboutRegistrationForEvent() {
-        userService.getAllActiveUsers().forEach(user -> {
+        Set<UUID> userIds = eventService.getAllEventsForNextMonthByUnitId(UnitRepository.DEFAULT_UNIT_ID).map(event -> event.getUser().getId()).collect(Collectors.toSet());
+       log.info("Reg users: " + userIds);
+       userService.getAllActiveUsers().stream().filter(user -> !userIds.contains(user.getId())).forEach(user -> {
             var messageToUser = MessageFormat.format(NOTIFY_REGISTRATION_MESSAGE, user.getName());
             log.info("messageToUser {}", messageToUser);
             this.telegramBotClient.sendMessage(user.getTelegramId(), messageToUser, Buttons.of(List.of(Buttons.REGISTER_FOR_EVENT)));

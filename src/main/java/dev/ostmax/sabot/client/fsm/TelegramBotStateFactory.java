@@ -1,18 +1,13 @@
 package dev.ostmax.sabot.client.fsm;
 
 import dev.ostmax.sabot.client.BotContext;
-import dev.ostmax.sabot.client.fsm.states.AdminState;
 import dev.ostmax.sabot.client.fsm.states.BotState;
-import dev.ostmax.sabot.client.fsm.states.EventRegistrationChooseTimeState;
-import dev.ostmax.sabot.client.fsm.states.EventRegistrationSaveState;
 import dev.ostmax.sabot.client.fsm.states.NewUserState;
-import dev.ostmax.sabot.client.fsm.states.StartState;
 import dev.ostmax.sabot.client.fsm.states.UnknownCommandState;
 import dev.ostmax.sabot.client.fsm.states.UserRegistrationState;
 import dev.ostmax.sabot.model.User;
 import dev.ostmax.sabot.service.UserService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -45,10 +40,13 @@ public class TelegramBotStateFactory {
         Optional<User> userTest = userService.findByTelegramId(context.getUserId());
         if (userTest.isEmpty()) {
             return applicationContext.getBean(NewUserState.class);
-        } else {
-            User user = userTest.get();
-            context.setUser(user);
+        }
 
+        User user = userTest.get();
+        context.setUser(user);
+        if (!isRegistered(user)) {
+            return applicationContext.getBean(UserRegistrationState.class);
+        } else {
             BotState command = statesByCommandName.get(context.getMessage().split(" ")[0]);
             if (command != null) {
                 log.info("state by command {}", command);
@@ -65,6 +63,10 @@ public class TelegramBotStateFactory {
 
             return applicationContext.getBean(UnknownCommandState.class);
         }
+    }
+
+    private boolean isRegistered(User user) {
+        return user.getCreatedDate() != null;
     }
 
 }

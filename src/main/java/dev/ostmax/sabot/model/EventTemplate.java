@@ -5,13 +5,17 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import lombok.Setter;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Set;
 
@@ -19,7 +23,10 @@ import java.util.Set;
 @Entity
 @Builder
 @NoArgsConstructor
+@Getter
+@Setter
 @AllArgsConstructor
+@Table(name = "event_template")
 public class EventTemplate {
     @Id
     @GeneratedValue
@@ -33,7 +40,10 @@ public class EventTemplate {
     private LocalTime occursTime;
     @NonNull
     private Regularity regularity;
+    private LocalDate beginDate;
+    private LocalDate endDate;
     @ManyToOne
+    @NonNull
     private Unit unit;
     @OneToMany(mappedBy = "template")
     private Set<EventItem> events;

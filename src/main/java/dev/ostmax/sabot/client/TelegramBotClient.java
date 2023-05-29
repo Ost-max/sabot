@@ -23,7 +23,7 @@ import static dev.ostmax.sabot.client.BotCommands.LIST_OF_COMMANDS;
 
 @Slf4j
 @Component
-public class TelegramBotClient extends TelegramLongPollingBot implements MessageClient{
+public class TelegramBotClient extends TelegramLongPollingBot implements MessageClient {
 
     private final TelegramClientProperties config;
     private final TelegramBotStateFactory telegramBotStateFactory;

@@ -12,20 +12,26 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.Immutable;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "event_template_user")
 @Immutable
+@Table(name = "event_template_user")
 public class EventItem {
 
     public EventItem(Id id, String name, LocalDateTime time, EventTemplate template, User user) {
@@ -39,6 +45,18 @@ public class EventItem {
         this.id.templateId = template.getId();
         this.id.time = time;
     }
+
+    @Override
+    public String toString() {
+        return "EventItem{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", time=" + time +
+                ", template=" + template.getId() + " " + template.getName() +
+                ", user=" + user.getId() + " " + user.getName() +
+                '}';
+    }
+
     @Embeddable
     @Data
     @AllArgsConstructor
@@ -73,4 +91,17 @@ public class EventItem {
             insertable = false,
             updatable = false)
     private User user;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        EventItem eventItem = (EventItem) o;
+        return getId() != null && Objects.equals(getId(), eventItem.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

@@ -17,12 +17,12 @@ public class UserRegistrationState implements BotState {
     public static final String STATE_ID = "USER_REGISTRATION";
     private static final String ERROR_NAME_MSG = "Ошибка ввода. ФИО должно состояить из трёх слов разделённых пробелом.";
     private static final String ERROR_PHONE_MSG = "Ошибка ввода. Телефон должен соотвествовать формату: +79200799979 или 89200799979";
-    private static final String ENTER_PHONE = "Введите номер телефона по которуму можно с вами связаться. Например +79200799979";
+    private static final String ENTER_PHONE = "Введите номер телефона по которому можно с вами связаться. Например, +79200799979";
     private static final String ERROR_DATE_MSG = "Ошибка ввода. Не получается распознать дату. Дата должна быть в формате 17.02.1990";
 
-    private static final String ENTER_DATE_OF_BIRTH = "Введите дату рождения. Например 17.02.1990";
+    private static final String ENTER_DATE_OF_BIRTH = "Введите дату рождения. Например, 17.02.1990";
 
-    private static final String SUCCESS_MSG = "Спасибо, вы успешно зарегистрированны.";
+    private static final String SUCCESS_MSG = "Спасибо, вы успешно зарегистрированы.";
     private final RegistrationService registrationService;
     private final StartState startState;
 
