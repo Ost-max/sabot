@@ -4,7 +4,6 @@ import dev.ostmax.sabot.model.EventItem;
 import dev.ostmax.sabot.model.EventTemplate;
 import dev.ostmax.sabot.model.GroupEvent;
 import dev.ostmax.sabot.model.Regularity;
-import dev.ostmax.sabot.model.Unit;
 import dev.ostmax.sabot.model.User;
 import dev.ostmax.sabot.repository.EventRepository;
 import dev.ostmax.sabot.repository.EventTemplateRepository;
@@ -50,14 +49,17 @@ public class EventServiceImpl implements EventService {
                                         UUID unitId,
                                         DayOfWeek dayOfWeek,
                                         LocalTime occursTime,
-                                        Regularity regularity) {
-        Optional<Unit> unit = unitRepository.findById(unitId);
+                                        Regularity regularity,
+                                        LocalDate endDate,
+                                        LocalDate startDate) {
         return this.eventTemplateRepository.save(EventTemplate.builder()
                 .name(name)
                 .unit(unitRepository.findById(unitId).get())
                 .demand(demand)
                 .occursDayOfWeek(dayOfWeek)
                 .occursTime(occursTime)
+                .endDate(endDate)
+                .beginDate(startDate)
                 .regularity(regularity).build());
 
     }
@@ -87,21 +89,19 @@ public class EventServiceImpl implements EventService {
 
 
     @Override
-    public Set<LocalDate> getAllRegularEventDatesForNextPeriod(UUID unitId, LocalDate date, Regularity regularity) {
-        return  eventTemplateRepository
-                .findAllByUnitId(unitId)
+    public Set<LocalDate> getAllRegularEventDatesForNextPeriod(UUID unitId, LocalDate date, Regularity regularity, boolean filterVyEvent) {
+        Collection<EventTemplate> templates = eventTemplateRepository.findAllByUnitIdByEffectiveDate(unitId, date, regularity);
+        var existEventMap =  getFutureEventsToTemplateMap(templates, date.atStartOfDay(), date.with(lastDayOfMonth()).atTime(23, 59, 0));
+        return templates
                 .stream()
-                .filter(eventTemplate -> regularity.equals(eventTemplate.getRegularity()))
+                .filter(template -> !filterVyEvent || !existEventMap.containsKey(template) || existEventMap.get(template).size() < template.getDemand())
                 .map(EventTemplate::getOccursDayOfWeek)
                 .flatMap(day -> date.query(new AllSpecificDaysInAMonthQuery(day)).stream())
                 .collect(toSet());
     }
 
-    @Override
-    public Map<LocalDateTime, Set<GroupEvent>> getEventsWithParticipantsForConcreteDate(UUID unitId, LocalDate date) {
-        Collection<EventTemplate> templates = eventTemplateRepository.findAllByUnitIdAndOccursDayOfWeekByEffectiveDate(unitId, date.getDayOfWeek(), date);
-
-        var existEventMap = eventRepository.findEventsByTimeBetweenAndTemplateIdIn(date.atStartOfDay(), date.atTime(23, 59), templates.stream().map(EventTemplate::getId).collect(toSet()))
+    private Map<EventTemplate, Set<EventItem>> getFutureEventsToTemplateMap(Collection<EventTemplate> templates, LocalDateTime startTime,  LocalDateTime endTime) {
+        return eventRepository.findEventsByTimeBetweenAndTemplateIdIn(startTime, endTime, templates.stream().map(EventTemplate::getId).collect(toSet()))
                 .stream()
                 .collect(Collectors.groupingBy(
                         EventItem::getTemplate,
@@ -110,10 +110,17 @@ public class EventServiceImpl implements EventService {
                                 Collectors.toSet()
                         )
                 ));
+    }
+
+
+    @Override
+    public Map<LocalDateTime, Set<GroupEvent>> getEventsWithParticipantsForConcreteDate(UUID unitId, LocalDate date, boolean filterByLimit) {
+        Collection<EventTemplate> templates = eventTemplateRepository.findAllByUnitIdAndOccursDayOfWeekByEffectiveDate(unitId, date.getDayOfWeek(), date);
+        var existEventMap =  getFutureEventsToTemplateMap(templates, date.atStartOfDay(), date.atTime(23, 59, 59));
 
         var gropEvents = templates.stream().map(template -> {
                     var eventBuilder = GroupEvent.builder();
-                    eventBuilder.templateId(template.getId());
+                    eventBuilder.template(template);
                     eventBuilder.name(template.getName());
                     if (existEventMap.containsKey(template)) {
                         var events = existEventMap.get(template);
@@ -126,11 +133,11 @@ public class EventServiceImpl implements EventService {
                 }
         ).collect(toSet());
 
-
         return gropEvents
                 .stream()
+                .filter(groupEvent -> !filterByLimit || groupEvent.getParticipants().size() < groupEvent.getTemplate().getDemand())
                 .collect(Collectors.groupingBy(
-                        event -> event.getTime(),
+                        GroupEvent::getTime,
                         Collectors.mapping(
                                 event -> event,
                                 Collectors.toSet()
@@ -157,6 +164,11 @@ public class EventServiceImpl implements EventService {
         LocalDateTime start = LocalDateTime.now();
         LocalDateTime end = LocalDate.now().plusDays(1).atTime(LocalTime.MAX);
         return eventRepository.findEventsByTimeBetween(start, end, unitId).collect(toSet());
+    }
+
+    @Override
+    public Set<EventItem> getAllTemplateEventsForConcreteDate(long templateId, LocalDateTime start) {
+        return eventRepository.findEventItemByTemplateIdAndTimeEquals(templateId, start);
     }
 
 }

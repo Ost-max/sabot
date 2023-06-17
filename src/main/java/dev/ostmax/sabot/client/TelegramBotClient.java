@@ -81,7 +81,6 @@ public class TelegramBotClient extends TelegramLongPollingBot implements Message
             }
         } else if (update.hasCallbackQuery()) {
             botContextBuilder.messageId(update.getCallbackQuery().getMessage().getMessageId());
-            botContextBuilder.hasCallbackQuery(true);
             botContextBuilder.message(update.getCallbackQuery().getData());
             botContextBuilder.callbackQuery(update.getCallbackQuery().getData());
             botContextBuilder.chatId(update.getCallbackQuery().getMessage().getChatId());

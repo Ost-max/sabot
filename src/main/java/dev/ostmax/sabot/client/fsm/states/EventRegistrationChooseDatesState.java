@@ -54,13 +54,17 @@ public class EventRegistrationChooseDatesState implements BotState, BotCommand {
     }
 
     private void printAvailableDatesFor(LocalDate requestedDate, BotContext botContext) {
-      var  availableDates = eventService.getAllRegularEventDatesForNextPeriod(DEFAULT_UNIT_ID, requestedDate, Regularity.ONCE_A_WEEK).
+      var  availableDates = eventService.getAllRegularEventDatesForNextPeriod(DEFAULT_UNIT_ID, requestedDate, Regularity.ONCE_A_WEEK, true).
                 stream().
                 sorted().
                 map(this::toButton).
-                collect(Collectors.toList());
-        botContext.sendMessage(StringUtils.capitalize(DateTimeUtils.getFormattedMonthName(requestedDate)),
-                Buttons.of(availableDates));
+              collect(Collectors.toList());
+        if (availableDates.size() > 0) {
+            botContext.sendMessage(StringUtils.capitalize(DateTimeUtils.getFormattedMonthName(requestedDate)),
+                    Buttons.of(availableDates));
+        } else {
+            botContext.sendMessage("На текущий период свободных служений не осталось");
+        }
     }
 
     private InlineKeyboardButton toButton(LocalDate date) {

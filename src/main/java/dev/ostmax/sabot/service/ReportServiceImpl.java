@@ -33,12 +33,14 @@ public class ReportServiceImpl implements ReportService{
     public List<ReportColumn> getReportForMonth(LocalDate start) {
         List<LocalDate> currentMonthEvents = new ArrayList<>(eventService.getAllRegularEventDatesForNextPeriod(DEFAULT_UNIT_ID,
                         start,
-                        Regularity.ONCE_A_WEEK));
+                        Regularity.ONCE_A_WEEK,
+                false)
+        );
         var result = new ArrayList<ReportColumn>(currentMonthEvents.size());
         currentMonthEvents.sort(Comparator.naturalOrder());
         log.info(currentMonthEvents.toString());
         for(LocalDate date: currentMonthEvents) {
-            List<ReportRecord> eventList = eventService.getEventsWithParticipantsForConcreteDate(DEFAULT_UNIT_ID, date).values()
+            List<ReportRecord> eventList = eventService.getEventsWithParticipantsForConcreteDate(DEFAULT_UNIT_ID, date, false).values()
                     .stream()
                     .flatMap(events ->
                      events.stream().flatMap(event ->

@@ -3,6 +3,7 @@ package dev.ostmax.sabot.service;
 
 import dev.ostmax.sabot.model.User;
 
+import java.time.Month;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -12,7 +13,9 @@ public interface UserService {
 
     Optional<User> findByTelegramId(long telegramId);
 
-    Collection<User> getAllActiveUsers();
+    Collection<User> getAllActiveUsers(Month skipMonth);
 
-    void save(User user);
+    User save(User user);
+
+    void save(Collection<User> users);
 }

@@ -21,8 +21,18 @@ public class Buttons {
     private final TelegramClientProperties config;
 
     public static final InlineKeyboardButton REGISTER_FOR_EVENT = InlineKeyboardButton.builder()
-            .text("Зарегистрироваться на служение")
+            .text("✍️ Зарегистрироваться на служение")
             .callbackData(BotCommands.REGISTER_FOR_EVENT)
+            .build();
+
+    public static final InlineKeyboardButton REGISTER_FOR_EVENT_SHORT = InlineKeyboardButton.builder()
+            .text("✍️ Регистрация")
+            .callbackData(BotCommands.REGISTER_FOR_EVENT)
+            .build();
+
+    public static final InlineKeyboardButton SKIP_MONTH = InlineKeyboardButton.builder()
+            .text("❌ Пропущу")
+            .callbackData(BotCommands.SKIP_MONTH)
             .build();
 
     public static final InlineKeyboardButton START = InlineKeyboardButton.builder()
@@ -30,9 +40,9 @@ public class Buttons {
             .callbackData(BotCommands.START)
             .build();
 
-    private static final InlineKeyboardButton HELP_BUTTON = new InlineKeyboardButton("Помощь");
-    private static final InlineKeyboardButton MY_EVENTS_BUTTON = new InlineKeyboardButton("Когда я служу?");
-    private static final InlineKeyboardButton MONTH_EVENTS_BUTTON = new InlineKeyboardButton("Расписание на месяц");
+    private static final InlineKeyboardButton HELP_BUTTON = new InlineKeyboardButton("ℹ️ Помощь");
+    private static final InlineKeyboardButton MY_EVENTS_BUTTON = new InlineKeyboardButton("\uD83D\uDE4F Когда я служу?");
+    private static final InlineKeyboardButton MONTH_EVENTS_BUTTON = new InlineKeyboardButton("\uD83D\uDCC5 Расписание на месяц");
 
     //Admin
     private static final InlineKeyboardButton USER_LIST_BUTTON = new InlineKeyboardButton("Список участников");

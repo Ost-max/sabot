@@ -26,7 +26,9 @@ public interface EventService {
                                  UUID unitId,
                                  DayOfWeek dayOfWeek,
                                  LocalTime occursTime,
-                                 Regularity regularity);
+                                 Regularity regularity,
+                                 LocalDate endDate,
+                                 LocalDate startDate);
 
     @Transactional
     EventItem registerToEvent(long templateId, User user, LocalDateTime localDateTime);
@@ -34,9 +36,10 @@ public interface EventService {
     @Transactional
     Optional<EventItem> unregister(long templateId, User user, LocalDateTime localDateTime);
 
-    Set<LocalDate> getAllRegularEventDatesForNextPeriod(UUID unitId, LocalDate date, Regularity regularity);
+    @Transactional
+    Set<LocalDate> getAllRegularEventDatesForNextPeriod(UUID unitId, LocalDate date, Regularity regularity, boolean filterVyEvent);
 
-    Map<LocalDateTime, Set<GroupEvent>> getEventsWithParticipantsForConcreteDate(UUID unitId, LocalDate date);
+    Map<LocalDateTime, Set<GroupEvent>> getEventsWithParticipantsForConcreteDate(UUID unitId, LocalDate date, boolean filterByLimit);
 
     List<EventItem> getFutureUserEvent(User user);
 
@@ -45,4 +48,6 @@ public interface EventService {
 
     @Transactional
     Set<EventItem> getAllEventsForNextDate(UUID unitId);
+
+    Set<EventItem> getAllTemplateEventsForConcreteDate(long templateId, LocalDateTime time);
 }

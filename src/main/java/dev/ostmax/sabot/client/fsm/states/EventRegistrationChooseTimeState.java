@@ -36,16 +36,22 @@ public class EventRegistrationChooseTimeState implements BotState {
     @Transactional
     public BotState handleCommand(BotContext botContext) {
         try {
-            var timeToEvents = eventService.getEventsWithParticipantsForConcreteDate(DEFAULT_UNIT_ID, LocalDate.parse(botContext.getMessage()));
-            botContext.sendMessage("Выберете время и место:");
-            for(var entry: timeToEvents.entrySet()) {
-                botContext.sendMessage(entry.getKey().format(simple_date_time),
-                        Buttons.fromCommands(entry.getValue().stream()
-                                .map(this::mapToCommand).collect(Collectors.toList()))
-                );
+            var timeToEvents = eventService.getEventsWithParticipantsForConcreteDate(DEFAULT_UNIT_ID, LocalDate.parse(botContext.getMessage()), true);
+            if (timeToEvents.size() > 0) {
+                botContext.sendMessage("Выберете время и место:");
+                for (var entry : timeToEvents.entrySet()) {
+                    botContext.sendMessage(entry.getKey().format(simple_date_time),
+                            Buttons.fromCommands(entry.getValue()
+                                    .stream()
+                                    .map(this::mapToCommand)
+                                    .collect(Collectors.toList()))
+                    );
+                }
+                botContext.getUser().setStateId(EventRegistrationSaveState.STATE_ID);
+                userService.save(botContext.getUser());
+            } else {
+                botContext.sendMessage("На выбранную дату свободных служений не осталось");
             }
-            botContext.getUser().setStateId(EventRegistrationSaveState.STATE_ID);
-            userService.save(botContext.getUser());
         } catch (DateTimeParseException ex) {
             botContext.sendMessage("Не могу распознать дату. Попробуйте ещё раз или нажмите вернуться в главное меню.", Buttons.start());
         }
@@ -57,9 +63,9 @@ public class EventRegistrationChooseTimeState implements BotState {
                 " " +
                 event.getTime() +
                 " " +
-                event.getTemplateId();
+                event.getTemplate().getId();
         log.info(command);
-        return new SimpleCommand(event.getName(), command);
+        return new SimpleCommand(event.getName() + " " + event.getParticipants().size() + "/" + event.getTemplate().getDemand(), command);
     }
 
     @Override

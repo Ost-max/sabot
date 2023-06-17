@@ -17,6 +17,7 @@ public interface BotCommands {
     String MONTHLY_SCHEDULE = "/MONTHLY_SCHEDULE";
     String UNREGISTER_FROM_EVENT = "/unregister_from_event";
 
+    String SKIP_MONTH = "/skip_month";
 
     String SAVE_EVENT = "save_event";
 

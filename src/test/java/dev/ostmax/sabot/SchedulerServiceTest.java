@@ -4,6 +4,7 @@ import dev.ostmax.sabot.client.MessageClient;
 import dev.ostmax.sabot.model.Regularity;
 import dev.ostmax.sabot.model.User;
 import dev.ostmax.sabot.repository.UnitRepository;
+import dev.ostmax.sabot.repository.UserRepository;
 import dev.ostmax.sabot.service.EventService;
 import dev.ostmax.sabot.service.SchedulingServiceImpl;
 import dev.ostmax.sabot.service.UserService;
@@ -23,6 +24,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @SpringBootTest(properties = "application-test.properties")
@@ -40,17 +42,26 @@ public class SchedulerServiceTest {
     private UserService userService;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private SchedulingServiceImpl schedulingService;
 
     @Test
     public void testNotifyUsersAboutRegistrationForEvent() {
         userService.save(User.builder().telegramId(1L).active(true).name("Test user").build());
+        userService.save(User.builder().telegramId(5L).skipPeriod(LocalDate.now().getMonth()).active(true).name("Test user 2").build());
+        userService.save(User.builder().telegramId(6L).skipPeriod(LocalDate.now().getMonth().plus(1)).active(true).name("Test user 3").build());
         var user2 = User.builder().telegramId(2L).active(true).name("Test Registered user").build();
         userService.save(user2);
-        var template = eventService.createTemplate("Test template", 2, UnitRepository.DEFAULT_UNIT_ID, DayOfWeek.SUNDAY, LocalTime.now(), Regularity.ONCE_A_WEEK);
+        var template = eventService.createTemplate("Test template", 2, UnitRepository.DEFAULT_UNIT_ID, DayOfWeek.SUNDAY, LocalTime.now(), Regularity.ONCE_A_WEEK, LocalDate.now().plusDays(100), LocalDate.now().minusDays(100));
         eventService.registerToEvent(template.getId(), user2, LocalDateTime.now().plusMonths(1)); //TODO CHECK in case of fail
+        System.out.println(userRepository.findBySkipPeriodNotOrSkipPeriodNullAndActiveTrue(LocalDate.now().getMonth()));
         schedulingService.notifyUsersAboutRegistrationForEvent();
-        verify(testClient).sendMessage(eq(1L), contains("начинается новый месяц"), any());
+        verify(testClient).sendMessage(eq(1L), contains("Уважаемый(ая) Test user, начинается новый месяц"), any());
+        verify(testClient).sendMessage(eq(5L), contains("Уважаемый(ая) Test user 2, начинается новый месяц"), any());
+        verify(testClient, never()).sendMessage(eq(6L), any(), any());
+        verify(testClient, never()).sendMessage(eq(2L), any(), any());
     }
 
     @Test
@@ -58,7 +69,7 @@ public class SchedulerServiceTest {
         var user = User.builder().telegramId(3L).active(true).name("Test Registered user").build();
         userService.save(user);
         var tomorrow = LocalDate.now().plusDays(1);
-        var template = eventService.createTemplate("Test template", 2, UnitRepository.DEFAULT_UNIT_ID, tomorrow.getDayOfWeek(), LocalTime.of(10, 0), Regularity.ONCE_A_WEEK);
+        var template = eventService.createTemplate("Test template", 2, UnitRepository.DEFAULT_UNIT_ID, tomorrow.getDayOfWeek(), LocalTime.of(10, 0), Regularity.ONCE_A_WEEK, LocalDate.now().plusDays(100), LocalDate.now().minusDays(100));
         eventService.registerToEvent(template.getId(), user, tomorrow.atTime(10, 0));
         schedulingService.notifyUsersBeforeEvent();
         verify(testClient).sendMessage(eq(3L), contains("вы записаны"));

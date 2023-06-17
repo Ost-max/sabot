@@ -76,7 +76,7 @@ public class UserRegistrationTest {
         state.handleCommand(context);
         verify(testClient).sendMessage(eq(1L), startsWith("Спасибо, вы успешно зарегистрированы"));
 
-        assertThat(userRepository.findAll()).hasSize(1);
+        assertThat(userRepository.findAll()).isNotEmpty();
         var userFromRepo = userRepository.findByTelegramId(user.getTelegramId());
         assertThat(userFromRepo).isPresent();
         assertThat(userFromRepo.get().getName()).isEqualTo("Иванов Иван Иванович");

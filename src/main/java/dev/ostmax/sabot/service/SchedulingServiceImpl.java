@@ -60,11 +60,16 @@ public class SchedulingServiceImpl implements SchedulingService {
     public void notifyUsersAboutRegistrationForEvent() {
         Set<UUID> userIds = eventService.getAllEventsForNextMonthByUnitId(UnitRepository.DEFAULT_UNIT_ID).map(event -> event.getUser().getId()).collect(Collectors.toSet());
        log.info("Reg users: " + userIds);
-       userService.getAllActiveUsers().stream().filter(user -> !userIds.contains(user.getId())).forEach(user -> {
-            var messageToUser = MessageFormat.format(NOTIFY_REGISTRATION_MESSAGE, user.getName());
-            log.info("messageToUser {}", messageToUser);
-            this.telegramBotClient.sendMessage(user.getTelegramId(), messageToUser, Buttons.of(List.of(Buttons.REGISTER_FOR_EVENT)));
-        });
+       var users=  userService.getAllActiveUsers(LocalDate.now().getMonth().plus(1)).stream().filter(user -> !userIds.contains(user.getId()))
+               .peek(user -> {
+                 var messageToUser = MessageFormat.format(NOTIFY_REGISTRATION_MESSAGE, user.getName());
+                 log.info("messageToUser {}", messageToUser);
+                 user.setSkipPeriod(null);
+                 this.telegramBotClient.sendMessage(user.getTelegramId(),
+                    messageToUser,
+                    Buttons.of(List.of(Buttons.SKIP_MONTH, Buttons.REGISTER_FOR_EVENT_SHORT)));
+        }).collect(Collectors.toSet());
+       userService.save(users);
     }
 
     public void test() {

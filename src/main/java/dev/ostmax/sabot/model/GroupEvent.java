@@ -11,7 +11,7 @@ import java.util.Set;
 @Builder
 public class GroupEvent {
 
-    private long templateId;
+    private EventTemplate template;
     private String name;
     @Singular
     private Set<User> participants;

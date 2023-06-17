@@ -32,6 +32,11 @@ public class BotContext {
         client.sendMessage(chatId, text, keyboard);
     }
 
+    public boolean isHasCallbackQuery() {
+        return callbackQuery != null;
+    }
+
+
   /*  public void sendReplyMessage(String text, ReplyKeyboard keyboard) {
         client.sendMessage(chatId, text, keyboard, messageId);
     }*/

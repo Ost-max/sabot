@@ -22,4 +22,6 @@ public interface EventRepository extends CrudRepository<EventItem, EventItem.Id>
 
     List<EventItem> findEventItemByUserIdAndTimeAfter(UUID userId, LocalDateTime start);
 
+    Set<EventItem> findEventItemByTemplateIdAndTimeEquals(long templateId, LocalDateTime start);
+
 }

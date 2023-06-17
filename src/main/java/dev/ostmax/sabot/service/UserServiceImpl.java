@@ -4,6 +4,7 @@ import dev.ostmax.sabot.model.User;
 import dev.ostmax.sabot.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.Month;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -27,13 +28,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Collection<User> getAllActiveUsers() {
-        return userRepository.findAllByActiveIsTrue();
+    public Collection<User> getAllActiveUsers(Month skipMonth) {
+        return userRepository.findBySkipPeriodNotOrSkipPeriodNullAndActiveTrue(skipMonth);
     }
 
     @Override
-    public void save(User user) {
-        userRepository.save(user);
+    public User save(User user) {
+       return userRepository.save(user);
+    }
+    @Override
+    public void save(Collection<User> users) {
+        userRepository.saveAll(users);
     }
 
 }
