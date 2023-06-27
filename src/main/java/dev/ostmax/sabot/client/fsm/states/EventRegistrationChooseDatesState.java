@@ -43,9 +43,12 @@ public class EventRegistrationChooseDatesState implements BotState, BotCommand {
         if (userTest.isPresent()) {
             User user = userTest.get();
             var requestedDate = LocalDate.now();
-            printAvailableDatesFor(requestedDate, botContext);
+            var dateWerePrinted = printAvailableDatesFor(requestedDate, botContext);
             if (requestedDate.getDayOfMonth() > 15) {
-                printAvailableDatesFor(requestedDate.plusMonths(1).with(firstDayOfMonth()), botContext);
+                dateWerePrinted = dateWerePrinted || printAvailableDatesFor(requestedDate.plusMonths(1).with(firstDayOfMonth()), botContext);
+            }
+            if(!dateWerePrinted) {
+                botContext.sendMessage("На текущий период свободных служений не осталось");
             }
             user.setStateId(eventRegistrationChooseTime.getStateId());
             userService.save(user);
@@ -53,22 +56,23 @@ public class EventRegistrationChooseDatesState implements BotState, BotCommand {
         return null;
     }
 
-    private void printAvailableDatesFor(LocalDate requestedDate, BotContext botContext) {
+    private boolean printAvailableDatesFor(LocalDate requestedDate, BotContext botContext) {
       var  availableDates = eventService.getAllRegularEventDatesForNextPeriod(DEFAULT_UNIT_ID, requestedDate, Regularity.ONCE_A_WEEK, true).
                 stream().
                 sorted().
                 map(this::toButton).
               collect(Collectors.toList());
+
         if (availableDates.size() > 0) {
             botContext.sendMessage(StringUtils.capitalize(DateTimeUtils.getFormattedMonthName(requestedDate)),
                     Buttons.of(availableDates));
-        } else {
-            botContext.sendMessage("На текущий период свободных служений не осталось");
+            return true;
         }
+        return false;
     }
 
     private InlineKeyboardButton toButton(LocalDate date) {
-        InlineKeyboardButton button = new InlineKeyboardButton(date.format(simple_date_month));
+        InlineKeyboardButton button = new InlineKeyboardButton(String.valueOf(date.getDayOfMonth()));
         button.setCallbackData(date.toString());
         return  button;
     }

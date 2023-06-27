@@ -1,6 +1,8 @@
 package dev.ostmax.sabot.service;
 
 import dev.ostmax.sabot.model.EventItem;
+import dev.ostmax.sabot.model.GroupEvent;
+import dev.ostmax.sabot.model.MonthReport;
 import dev.ostmax.sabot.model.Regularity;
 import dev.ostmax.sabot.model.ReportColumn;
 import dev.ostmax.sabot.model.ReportRecord;
@@ -12,7 +14,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -30,7 +31,7 @@ public class ReportServiceImpl implements ReportService{
     }
 
     @Override
-    public List<ReportColumn> getReportForMonth(LocalDate start) {
+    public MonthReport getReportForMonth(LocalDate start) {
         List<LocalDate> currentMonthEvents = new ArrayList<>(eventService.getAllRegularEventDatesForNextPeriod(DEFAULT_UNIT_ID,
                         start,
                         Regularity.ONCE_A_WEEK,
@@ -39,16 +40,19 @@ public class ReportServiceImpl implements ReportService{
         var result = new ArrayList<ReportColumn>(currentMonthEvents.size());
         currentMonthEvents.sort(Comparator.naturalOrder());
         log.info(currentMonthEvents.toString());
-        for(LocalDate date: currentMonthEvents) {
+        for (LocalDate date : currentMonthEvents) {
             List<ReportRecord> eventList = eventService.getEventsWithParticipantsForConcreteDate(DEFAULT_UNIT_ID, date, false).values()
                     .stream()
                     .flatMap(events ->
-                     events.stream().flatMap(event ->
-                            Stream.concat(Stream.of(new ReportRecord(event.getName() + " " + event.getTime().toLocalTime(), true)),
-                                    event.getParticipants().stream().map(user -> new ReportRecord(user.getName()))))).toList();
+                            events.stream()
+                                    .sorted(Comparator.comparing(GroupEvent::getTime))
+                                    .flatMap(event ->
+                                            Stream.concat(Stream.of(new ReportRecord(event.getName() + " " + event.getTime().toLocalTime(), true)),
+                                                    event.getParticipants().stream().map(user -> new ReportRecord(user.getName()))))).toList();
+
             result.add(new ReportColumn(date.format(DateTimeUtils.simple_date_month), eventList));
         }
-        return result;
+        return MonthReport.builder().month(DateTimeUtils.getFormattedMonthName(start)).columns(result).build();
     }
 
     @Override

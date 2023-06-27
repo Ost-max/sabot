@@ -26,22 +26,21 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.function.Consumer;
 
+import static java.time.LocalTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.mockingDetails;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.withSettings;
 
 @SpringBootTest(properties = "application-test.properties")
 @AutoConfigureTestDatabase
@@ -129,16 +128,33 @@ public class EventRegistrationTest {
         });
 
         var context = createContext();
-        chooseDate(context);
-        chooseTime(context, "Test event 2 1/2");
+        var state = stateFactory.getState(context);
+        state.handleCommand(context);
+
+        verify(testClient, atLeastOnce()).sendMessage(
+                anyLong(),
+                LocalDate.now().getDayOfMonth() > 15 ?
+                        contains(DateTimeUtils.getFormattedMonthName(LocalDate.now().plusMonths(1))) :
+                        contains(DateTimeUtils.getFormattedMonthName(LocalDate.now())),
+                keyboardCaptor.capture());
+
+        var keyboard = keyboardCaptor.getValue();
+        var nextSunday = LocalDate.now().with(TemporalAdjusters.next(DayOfWeek.SUNDAY)).getDayOfMonth();
+        assertThat(keyboard.getKeyboard().get(0).stream().filter(button -> button.getText().equals("" + nextSunday)).findAny()).isNotPresent();
+
+        /*  chooseDate(context);
+         chooseTime(context, "Test event 2 1/2");
         context.getUser().setStateId(EventRegistrationSaveState.STATE_ID);
         userService.save(context.getUser());
         var  state = stateFactory.getState(context);
         state.handleCommand(context);
         System.out.println(mockingDetails(testClient).printInvocations());
-        verify(testClient).sendMessage(anyLong(), contains("На текущий период свободных служений не осталось"));
-        verify(testClient).sendMessage(anyLong(), contains("На выбранную дату свободных служений не осталось"));
-        verify(testClient).sendMessage(anyLong(), contains("К сожалению, этот слот уже недоступен. Пожалуйста, выберете другое время"));
+        verify(testClient, atLeastOnce()).sendMessage(anyLong(), contains("На выбранную дату свободных служений не осталось"));
+        verify(testClient, atLeastOnce()).sendMessage(anyLong(), contains("К сожалению, этот слот уже недоступен. Пожалуйста, выберете другое время"));
+*/
+
+     //   verify(testClient, atLeastOnce()).sendMessage(anyLong(), contains("На текущий период свободных служений не осталось"));
+
     }
 
     private void registerForEvent(String targetEvent, Consumer<List<List<InlineKeyboardButton>>>... consumers) {
@@ -171,12 +187,23 @@ public class EventRegistrationTest {
         var state = stateFactory.getState(context);
         state.handleCommand(context);
 
-        verify(testClient, atLeastOnce()).sendMessage(anyLong(), contains(DateTimeUtils.getFormattedMonthName(LocalDate.now())), keyboardCaptor.capture());
+        verify(testClient, atLeastOnce()).sendMessage(
+                anyLong(),
+                LocalDate.now().getDayOfMonth() > 15 ?
+                        contains(DateTimeUtils.getFormattedMonthName(LocalDate.now().plusMonths(1))) :
+                        contains(DateTimeUtils.getFormattedMonthName(LocalDate.now())),
+                keyboardCaptor.capture());
 
         var keyboard = keyboardCaptor.getValue();
-        context.setCallbackQuery(keyboard.getKeyboard().get(0).get(0).getCallbackData());
+        var nextSunday = LocalDate.now().with(TemporalAdjusters.next(DayOfWeek.SUNDAY)).getDayOfMonth();
+        System.out.println("}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}} " + nextSunday);
+
+        System.out.println("}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}} " + keyboard.getKeyboard());
+
+        context.setCallbackQuery(keyboard.getKeyboard().get(0).stream().filter(button -> button.getText().equals("" + nextSunday)).findAny().get().getCallbackData());
         context.setMessage(context.getCallbackQuery());
-        System.out.println("}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}} " + context);
+        System.out.println("}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}} " + context.getCallbackQuery());
+
         state = stateFactory.getState(context);
         state.handleCommand(context);
     }

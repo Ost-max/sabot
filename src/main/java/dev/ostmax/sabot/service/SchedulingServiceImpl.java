@@ -38,7 +38,7 @@ public class SchedulingServiceImpl implements SchedulingService {
     }
 
     @Override
-    @Scheduled(cron = "0 0 13 * * *")
+    @Scheduled(cron = "0 0 11 * * *")
     @Transactional
     public void notifyUsersBeforeEvent() {
         Set<EventItem> events = eventService.getAllEventsForNextDate(UnitRepository.DEFAULT_UNIT_ID);
@@ -54,8 +54,10 @@ public class SchedulingServiceImpl implements SchedulingService {
     }
 
     @Override
-    @Scheduled(cron = "0 0 13 L-2 * *")
-    @Scheduled(cron = "0 0 13 L * *")
+    @Scheduled(cron = "0 0 12 L-5 * *")
+    @Scheduled(cron = "0 0 12 L-3 * *")
+    @Scheduled(cron = "0 0 12 L-1 * *")
+    @Scheduled(cron = "0 0 12 L * *")
     @Transactional
     public void notifyUsersAboutRegistrationForEvent() {
         Set<UUID> userIds = eventService.getAllEventsForNextMonthByUnitId(UnitRepository.DEFAULT_UNIT_ID).map(event -> event.getUser().getId()).collect(Collectors.toSet());

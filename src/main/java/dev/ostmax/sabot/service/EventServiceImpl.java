@@ -18,15 +18,19 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.time.temporal.TemporalAdjusters.lastDayOfMonth;
+import static java.util.stream.Collectors.summingInt;
+import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 
 @Service
@@ -90,15 +94,43 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Set<LocalDate> getAllRegularEventDatesForNextPeriod(UUID unitId, LocalDate date, Regularity regularity, boolean filterVyEvent) {
-        Collection<EventTemplate> templates = eventTemplateRepository.findAllByUnitIdByEffectiveDate(unitId, date, regularity);
-        var existEventMap =  getFutureEventsToTemplateMap(templates, date.atStartOfDay(), date.with(lastDayOfMonth()).atTime(23, 59, 0));
+        var templates = eventTemplateRepository.findAllByUnitIdByEffectiveDate(unitId, date, regularity);
+
+        var existEventMap = eventItemToDateMap(templates, date.atStartOfDay(), date.with(lastDayOfMonth()).atTime(23, 59, 0));
+        var templatesMap = templates.stream()
+                .collect(Collectors.groupingBy(
+                EventTemplate::getOccursDayOfWeek,
+                Collectors.mapping(
+                        Function.identity(),
+                        Collectors.toSet()
+                )
+        ));
+
         return templates
                 .stream()
-                .filter(template -> !filterVyEvent || !existEventMap.containsKey(template) || existEventMap.get(template).size() < template.getDemand())
                 .map(EventTemplate::getOccursDayOfWeek)
                 .flatMap(day -> date.query(new AllSpecificDaysInAMonthQuery(day)).stream())
-                .collect(toSet());
+                .filter( planedDate ->
+                        !filterVyEvent || !existEventMap.containsKey(planedDate) || existEventMap.get(planedDate).size() < countDemand(templatesMap.get(planedDate.getDayOfWeek()))
+                ).collect(toSet());
     }
+
+    private int countDemand(Set<EventTemplate> templates) {
+        return templates.stream().mapToInt(EventTemplate::getDemand).sum();
+    }
+
+    private Map<LocalDate, Set<EventItem>> eventItemToDateMap(Collection<EventTemplate> templates, LocalDateTime startTime, LocalDateTime endTime) {
+        return eventRepository.findEventsByTimeBetweenAndTemplateIdIn(startTime, endTime, templates.stream().map(EventTemplate::getId).collect(toSet()))
+                .stream()
+                .collect(Collectors.groupingBy(
+                        item -> item.getTime().toLocalDate(),
+                        Collectors.mapping(
+                                event -> event,
+                                Collectors.toSet()
+                        )
+                ));
+    }
+
 
     private Map<EventTemplate, Set<EventItem>> getFutureEventsToTemplateMap(Collection<EventTemplate> templates, LocalDateTime startTime,  LocalDateTime endTime) {
         return eventRepository.findEventsByTimeBetweenAndTemplateIdIn(startTime, endTime, templates.stream().map(EventTemplate::getId).collect(toSet()))
@@ -111,7 +143,6 @@ public class EventServiceImpl implements EventService {
                         )
                 ));
     }
-
 
     @Override
     public Map<LocalDateTime, Set<GroupEvent>> getEventsWithParticipantsForConcreteDate(UUID unitId, LocalDate date, boolean filterByLimit) {

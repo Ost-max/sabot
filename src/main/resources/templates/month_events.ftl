@@ -6,10 +6,10 @@
     <link href="/static/style/report.css" rel="stylesheet">
 </head>
 <body>
-<h2>График на текущий месяц</h2>
+<h2>График на ${report.month}</h2>
 <div class="table-container">
     <div class="event-table">
-        <#list report as item>
+        <#list report.columns as item>
             <div class="date-column">
                 <div class="date-title">
                     ${item.name}
@@ -24,7 +24,6 @@
             </div>
         </#list>
     </div>
-
 </div>
 </body>
 </html>
